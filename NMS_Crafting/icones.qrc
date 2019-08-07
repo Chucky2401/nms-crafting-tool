@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>NMS_101.ico</file>
+        <file>farming_24.png</file>
+    </qresource>
+</RCC>
