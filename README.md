@@ -11,7 +11,7 @@ Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi
 ![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
 
 ## Langages
-NMSCT[^1] est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
+NMSCT<sup>1</sup> est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
 Pour la base de données j'utilise SQLite v3. A terme, pour que le logiciel soit le plus "communautaire" possible, je basculerais sur une base de données serveur (MariaDB - PostgreSQL étant surdimensionné pour la quantité de données aujourd'hui).
 Je ne suis pas partis sur cette solution tout de suite car je suis en pleins développement. De plus, héberger une base de données soit même aujourd'hui et beaucoup trop risqué [Ranswonware Serveur MySQL][ransonwareBDD]. De plus, cela coûtant de l'argent (serveur, nom de domaine et certificat SSL), je ne peux pas me permettre aujourd'hui de payer cela.
 
@@ -42,7 +42,7 @@ La combo box qui liste les recettes a été modifié pour pouvoir saisir au clav
 ![v0.1.1](https://i.imgur.com/70CpomY.jpg)
 
 ### v0.1.2 - 16/06/2019
-Ici gros ajout au niveau du code pour une petite modification[^2].
+Ici gros ajout au niveau du code pour une petite modification<sup>2</sup>.
 J'ai ajouté toutes les images, dans :
 * La liste des recettes
 * A gauche de la description
@@ -80,6 +80,6 @@ La liste n'est pas bien longue, mais voici la liste :
 [nmsctFacebook]: https://www.facebook.com/NMS-Crafting-Tool-107068020644537
 
 ## Notes
-[^1]: NMSCT pour NMS Crafting Tool
+<sup>1</sup>: NMSCT pour NMS Crafting Tool
 
-[^2]: Je ne pensais pas qu'ajouter une image avec Qt, surtout avec le besoin de la redimensionner serait aussi complexe...
+<sup>2</sup>: Je ne pensais pas qu'ajouter une image avec Qt, surtout avec le besoin de la redimensionner serait aussi complexe...
