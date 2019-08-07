@@ -17,31 +17,31 @@ Je ne suis pas partis sur cette solution tout de suite car je suis en pleins dé
 
 ## A venir
 Voici une liste des choses que j'aimerais implémenter (incomplet) :
-* Utilisation d'une base de données serveur
-* Permettre l'ajout de recettes
-* Gestion des recettes (modification, suppression)
-* Gestion des ressources (modification, suppression)
-* Gestion des données de farming
-* Création d'un installeur
+- [ ] Utilisation d'une base de données serveur
+- [ ] Permettre l'ajout de recettes
+- [ ] Gestion des recettes (modification, suppression)
+- [ ] Gestion des ressources (modification, suppression)
+- [ ] Gestion des données de farming
+- [ ] Création d'un installeur
   Aujourd'hui je ne sais pas faire (sip...), mais je suis autodidacte, si quelqu'un s'y connaît bien, je suis preneur d'une bonne documentation/tuto :smile:
-* ...
+- [ ] ...
 
 ## Suivis des modifications
 
-### v0.1.0 - 16/06/2019
+### **v0.1.0** - *16/06/2019*
 Première version, premier code !
 Cette version est la toute première.
 Pas de long discours, juste une image.
 
 ![v0.1.0](https://i.imgur.com/qQvWFiU.jpg)
 
-### v0.1.1 - 16/06/2019
+### **v0.1.1** - *16/06/2019*
 Dans cette version, juste un petit changement suite aux premières remarques sur le groupe [No Man's Sky FR][nmsfr].
 La combo box qui liste les recettes a été modifié pour pouvoir saisir au clavier la recette à afficher.
 
 ![v0.1.1](https://i.imgur.com/70CpomY.jpg)
 
-### v0.1.2 - 16/06/2019
+### **v0.1.2** - *16/06/2019*
 Ici gros ajout au niveau du code pour une petite modification<sup>[2](#imageQt)</sup>.
 J'ai ajouté toutes les images, dans :
 * La liste des recettes
@@ -51,7 +51,7 @@ En bref, voici ce que ça donne :
 
 ![v0.1.2](https://i.imgur.com/x1jGSfd.jpg)
 
-### v0.1.3 - 07/08/2019
+### **v0.1.3** - *07/08/2019*
 Après presque deux mois d'absence, de nouvelles modifications !
 La liste n'est pas bien longue, mais voici la liste :
 * Ajout d'un menu
@@ -71,12 +71,14 @@ La liste n'est pas bien longue, mais voici la liste :
 ![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
 
 ## Divers
+**16/06/2019** - [Premier post sur le groupe][premierPost]
 **06/08/2019** - Création d'une page [Facebook][nmsctFacebook]
 
 ## References
 [Qt]: https://www.qt.io/
 [ransonwareBDD]: https://www.silicon.fr/grandcrab-242223.html
 [nmsfr]: https://www.facebook.com/groups/215415605504595
+[premierPost]: https://www.facebook.com/groups/215415605504595/permalink/831562540556562/
 [nmsctFacebook]: https://www.facebook.com/NMS-Crafting-Tool-107068020644537
 
 ## Notes
