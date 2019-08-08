@@ -2,13 +2,14 @@
 
 ## Description
 Outil permettant de lister les composants d'une recette du jeux No Man's Sky
+**/!\ OUTILS TOUJOURS EN DEVELOPPEMENT - PAS DE SORTIE POUR LE MOMENT /!\\**
 
 ## Fonctionnement
 A partir d'une recette, liste tous les composants nécessaires. Si les composants sont eux aussi une recette, les composants sont aussi listés, et ainsi de suite, de manière récursif. Tout ceci est affiché dans une liste de type arbre (Treeview).
 Finalement, toutes les ressources de base (Carbone, Solanium, etc.) sont listés pour obtenir le total pour la recette principale.
 Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi que le nombre de dome associé.
 
-![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
+![v0.1.4.1](https://i.imgur.com/oRX4pLf.jpg)
 
 ## Langages
 NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
@@ -74,9 +75,39 @@ La liste n'est pas bien longue, mais voici la liste :
 
 ![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
 
+### **v0.1.4.1** - *08/08/2019*
+Au départ, j'étais partie pour implémenter entièrement la fenêtre pour ajouter une recette...
+Au départ... Mais je suis comme un petit oiseau qui vole. Je suis dans mes pensées, et je code comme ça vient !
+Donc, voici les modification :
+
+* Création d'une classe pour les paramètres
+    - set / get / getIni ImagePath()
+    - set / get / getIni BddPath()
+    - set / get / getIni BddName()
+    - set / get / getIni Farming()
+    - set / get / getIni AutoExpand()
+* Modification du menu principale (sous la barre de titre)
+    - Fichier -> Quitter avec une icone
+    - Edition
+        + Ajouter Recette - *Ouvre une fenêtre vide pour le moment*
+    - Outil
+        + Préférences - *Ne fait rien pour le moment. A terme ouvrira une fenêtre de préférence*
+        + Farming - *Lié à la case à cocher dans la fenêtre*
+        + Etendre automatique - *Lié à la case à cocher dans la fenêtre*
+* Surcharge de la method closeEvent pour :
+	1. Fermer toutes les fenêtre modal ouverte
+	2. Demander confirmation avant fermeture
+* **BUG**
+    - Reproduire le bug : *Lister une recette, étendre des objets dans la liste, changer la quantité et actualiser. Changer de recette et lister les ingrédients. Switcher le bouton Farming et actualiser.*
+    - Correction : *Lors du clique sur le bouton Actualiser, ne prendre que les objets qui ont un enfant*
+* Ajout de commentaires dans le code
+
+![v0.1.4.1](https://i.imgur.com/oRX4pLf.jpg)
+
 ## Divers
 **16/06/2019** - [Premier post sur le groupe][premierPost]
 **06/08/2019** - Création d'une page [Facebook][nmsctFacebook]
+**07/08/2019** - Hébergement web gratuit réservé [NMSCT][epizy.com]
 
 ## References
 [Qt]: https://www.qt.io/
@@ -84,6 +115,7 @@ La liste n'est pas bien longue, mais voici la liste :
 [nmsfr]: https://www.facebook.com/groups/215415605504595
 [premierPost]: https://www.facebook.com/groups/215415605504595/permalink/831562540556562/
 [nmsctFacebook]: https://www.facebook.com/NMS-Crafting-Tool-107068020644537
+[epizy.com]: http://nmsct.epizy.com
 
 ## Notes
 <a name="nmsct">1</a>: NMSCT pour NMS Crafting Tool

@@ -26,6 +26,9 @@
 
 #include <QDebug>
 
+#include "settings.h"
+#include "ajouterrecette.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -41,16 +44,27 @@ public:
     void listeRecettes();
     void listerIngredients(QString recette);
     void pourTout(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
+    bool getEtatFenAjouterRecette();
+    void setEtatFenAjouterRecette(bool stated);
+
+protected:
+    void closeEvent(QCloseEvent *event);
 
 public slots:
     void clickListerIngredients();
     void recetteChoisis(int index);
     void modifierQuantite(int valeur);
-    void setFarming(int state);
-    void setAutoExpand(int state);
+    void setFarmingFromButton(int state);
+    void setFarmingFromMenu(bool state);
+    void setAutoExpandFromButton(int state);
+    void setAutoExpandFromMenu(bool state);
+    void ouvrirFenAjouterRecette();
+    void fenAjouterRecetteClose(int result);
 
 
 private:
+    ajouterRecette *fenAjouterRecette;
+    bool fenAjouterRecetteOuverte;
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
 
@@ -63,12 +77,7 @@ private:
     bool viewWasExtended;
     QStringList itemExpanded;
 
-    QSettings *settings;
-    QString imagePath;
-    QString bddPath;
-    QString bddName;
-    QString farming;
-    QString autoExpand;
+    class settings param;
 };
 
 #endif // MAINWINDOW_H

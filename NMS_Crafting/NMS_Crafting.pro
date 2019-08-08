@@ -27,13 +27,18 @@ CONFIG += c++11
 RC_ICONS = NMS_101.ico
 
 SOURCES += \
+        ajouterrecette.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        settings.cpp
 
 HEADERS += \
-        mainwindow.h
+        ajouterrecette.h \
+        mainwindow.h \
+        settings.h
 
 FORMS += \
+        ajouterrecette.ui \
         mainwindow.ui
 
 # Default rules for deployment.

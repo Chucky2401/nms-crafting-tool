@@ -317,6 +317,10 @@
           <property name="text">
            <string>Etendre tout automatiquement ?</string>
           </property>
+          <property name="icon">
+           <iconset resource="icones.qrc">
+            <normaloff>:/expand_24.png</normaloff>:/expand_24.png</iconset>
+          </property>
          </widget>
         </item>
         <item>
@@ -354,9 +358,30 @@
     </property>
     <addaction name="aQuitter"/>
    </widget>
+   <widget class="QMenu" name="mEditer">
+    <property name="title">
+     <string>&amp;Edition</string>
+    </property>
+    <addaction name="aAjouterRecette"/>
+   </widget>
+   <widget class="QMenu" name="menu_Outil">
+    <property name="title">
+     <string>&amp;Outil</string>
+    </property>
+    <addaction name="aPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="aFarming"/>
+    <addaction name="aAutoExpand"/>
+   </widget>
    <addaction name="mFichier"/>
+   <addaction name="mEditer"/>
+   <addaction name="menu_Outil"/>
   </widget>
   <action name="aQuitter">
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/close_24.png</normaloff>:/close_24.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Quitter</string>
    </property>
@@ -365,6 +390,48 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="aAjouterRecette">
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/add_24.png</normaloff>:/add_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Ajouter recette...</string>
+   </property>
+  </action>
+  <action name="aPreferences">
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/settings_24.png</normaloff>:/settings_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Préférences...</string>
+   </property>
+  </action>
+  <action name="aFarming">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/farming_24.png</normaloff>:/farming_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Farming ?</string>
+   </property>
+  </action>
+  <action name="aAutoExpand">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/expand_24.png</normaloff>:/expand_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Etendre automatiquement ?</string>
    </property>
   </action>
  </widget>

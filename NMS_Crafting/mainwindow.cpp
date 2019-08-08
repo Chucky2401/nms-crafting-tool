@@ -7,52 +7,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    /*
-     * Définition des paramètres 'variable'
-     * Un groupe pour la base de données
-     * Un pour les images
-     */
-    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "BlackWizard Company", "NMS Crafting Tool");
-    imagePath = settings->value("img/path", settingDefaultString).toString();
-    bddPath = settings->value("bdd/path", settingDefaultString).toString();
-    bddName = settings->value("bdd/name", settingDefaultString).toString();
-    farming = settings->value("utilisateur/farming", settingDefaultString).toString();
-    autoExpand = settings->value("utilisateur/autoExpand", settingDefaultString).toString();
+    ui->cbFarming->setChecked(param.getFarming());
+    ui->aFarming->setChecked(param.getFarming());
 
-    if (imagePath == settingDefaultString){
-        settings->setValue("img/path", "./img/");
-        imagePath = "./img/";
-    }
-
-    if (bddPath == settingDefaultString){
-        settings->setValue("bdd/path", "./bdd/");
-        bddPath = "./bdd/";
-    }
-
-    if (bddName == settingDefaultString){
-        settings->setValue("bdd/name", "nms_database-TEST.db");
-        bddName = "nms_database-TEST.db";
-    }
-
-    if (farming == settingDefaultString){
-        farming = "false";
-    }
-
-    if (farming == "true") {
-        ui->cbFarming->setCheckState(Qt::Checked);
-    } else {
-        ui->cbFarming->setCheckState(Qt::Unchecked);
-    }
-
-    if (autoExpand == settingDefaultString){
-        autoExpand = "false";
-    }
-
-    if (autoExpand == "true") {
-        ui->cbAutoExpand->setCheckState(Qt::Checked);
-    } else {
-        ui->cbAutoExpand->setCheckState(Qt::Unchecked);
-    }
+    ui->cbAutoExpand->setChecked(param.getAutoExpand());
+    ui->aAutoExpand->setChecked(param.getAutoExpand());
 
     db = QSqlDatabase::addDatabase("QSQLITE");
     if (createConnection()){
@@ -60,25 +19,49 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     modele = new QStandardItemModel();
+    setEtatFenAjouterRecette(false);
 
     connect(ui->qcbListeRecettes, SIGNAL(currentIndexChanged(int)), this, SLOT(recetteChoisis(int)));
     connect(ui->pbRecherche, SIGNAL(clicked()), this, SLOT(clickListerIngredients()));
     connect(ui->sbQuantite, SIGNAL(valueChanged(int)), this, SLOT(modifierQuantite(int)));
-    connect(ui->cbFarming, SIGNAL(stateChanged(int)), this, SLOT(setFarming(int)));
-    connect(ui->cbAutoExpand, SIGNAL(stateChanged(int)), this, SLOT(setAutoExpand(int)));
-    connect(ui->aQuitter, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(ui->cbFarming, SIGNAL(stateChanged(int)), this, SLOT(setFarmingFromButton(int)));
+    connect(ui->aFarming, SIGNAL(toggled(bool)), this, SLOT(setFarmingFromMenu(bool)));
+    connect(ui->cbAutoExpand, SIGNAL(stateChanged(int)), this, SLOT(setAutoExpandFromButton(int)));
+    connect(ui->aAutoExpand, SIGNAL(toggled(bool)), this, SLOT(setAutoExpandFromMenu(bool)));
+    connect(ui->aQuitter, SIGNAL(triggered()), this, SLOT(close()));
+    connect(ui->aAjouterRecette, SIGNAL(triggered()), this, SLOT(ouvrirFenAjouterRecette()));
 }
 
+/*
+ * Destructeur
+ */
 MainWindow::~MainWindow()
 {
     db.close();
+    if (getEtatFenAjouterRecette())
+        fenAjouterRecette->close();
     delete ui;
 }
 
+/*
+ * Fonction pour détecter quand la fenêtre est fermé
+ */
+void MainWindow::closeEvent(QCloseEvent *event){
+    if (QMessageBox::question(this, "Fermeture", "Voulez-vous fermer le programme ?") == QMessageBox::Yes){
+        if (getEtatFenAjouterRecette())
+            fenAjouterRecette->close();
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
+/*
+ * Fonction d'ouverture de la connexion à la Base de données
+ */
 bool MainWindow::createConnection()
 {
-    db.setDatabaseName(bddPath+bddName);
-    //db.setDatabaseName("./bdd/nms_database.db");
+    db.setDatabaseName(param.getBddPath()+param.getBddName());
     if (!db.open()) {
         QSqlError error = db.lastError();
         QMessageBox::critical(this, "Connexion à la BDD", "Echec de la connexion à la Base de Données.\nDétails:\n"+error.text());
@@ -87,10 +70,16 @@ bool MainWindow::createConnection()
     return true;
 }
 
+/*
+ * Fonction qui liste les recettes dans le combo box
+ */
 void MainWindow::listeRecettes()
 {
     QSqlQuery query;
     int recetteNiveau = 0;
+
+    // On vide le champ avant de le remplir
+    ui->qcbListeRecettes->clear();
 
     ui->qcbListeRecettes->addItem("*** Choisir une Recette ***", "NOTHING");
     if(query.exec("SELECT DISTINCT recette_nom_fr, recette_description_courte, recette_niveau, recette_icone FROM Recettes ORDER BY recette_niveau, recette_nom_fr")){
@@ -111,7 +100,7 @@ void MainWindow::listeRecettes()
             }
 
 
-            ui->qcbListeRecettes->addItem(QIcon(imagePath+nomIcone), nomRecetteAffichage, nomRecetteFr);
+            ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, nomRecetteFr);
         }
     }else{
         QMessageBox::critical(this, "Listing Recettes", "Erreur récupération des recettes.\nDétails:\n"+query.lastError().text());
@@ -119,7 +108,11 @@ void MainWindow::listeRecettes()
     ui->pbRecherche->setEnabled(false);
 }
 
+/*
+ * Fonction lors du choix de la recette
+ */
 void MainWindow::recetteChoisis(int index){
+    index += 0;
     QSqlQuery query;
     QString recette = ui->qcbListeRecettes->currentData().toString();
 
@@ -139,7 +132,7 @@ void MainWindow::recetteChoisis(int index){
             while(query.next()){
                 QString nomIcone = query.value("recette_icone").toString();
                 QString description = query.value("recette_description").toString();
-                QPixmap image(imagePath+nomIcone);
+                QPixmap image(param.getImagePath()+nomIcone);
 
                 if (description == ""){
                     description = "<em>Pas de description</em>";
@@ -147,7 +140,7 @@ void MainWindow::recetteChoisis(int index){
 
                 ui->teRecetteDescription->append(description);
                 ui->imageRecette->setPixmap(image.scaled(100, 100));
-                ui->qcbListeRecettes->setToolTip("<img src='"+imagePath+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette+"</strong> \
+                ui->qcbListeRecettes->setToolTip("<img src='"+param.getImagePath()+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette+"</strong> \
                                                 <br /><br />"+description);
             }
         }
@@ -164,7 +157,7 @@ void MainWindow::clickListerIngredients(){
      * On va d'abord chercher tous les éléments qui ont étais étendu par l'utilisateur
      * Si l'auto expand est off, cela ne sert à rien.
      */
-    if (autoExpand == "false"){
+    if (!param.getAutoExpand()){
         QModelIndex rootIndex = modele->index(0, 0);
         QVariant rootName = modele->data(rootIndex);
         itemExpanded.clear();
@@ -220,7 +213,7 @@ void MainWindow::listerIngredients(QString recette){
     // On ajoute notre recette à notre modèle
     rootNom->setEditable(false);
     rootQuantite->setEditable(false);
-    rootNom->setIcon(QIcon(imagePath+nomIcone));
+    rootNom->setIcon(QIcon(param.getImagePath()+nomIcone));
     root << rootNom << rootQuantite;
     modele->appendRow(root);
 
@@ -301,7 +294,7 @@ void MainWindow::listerIngredients(QString recette){
                     niveauxTemp.push_back(niveauComposant);
 
                     composantNom->setText(nomComposant);
-                    composantNom->setIcon(QIcon(imagePath+iconeComposant));
+                    composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
                     composantQuantite->setText(quantiteSql);
                 } else {
                     /*
@@ -345,7 +338,7 @@ void MainWindow::listerIngredients(QString recette){
                     }
 
                     composantNom->setText(nomComposant);
-                    composantNom->setIcon(QIcon(imagePath+iconeComposant));
+                    composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
                     composantQuantite->setText(quantite);
                 }
                 // On ajoute nos résultats au parents
@@ -416,7 +409,7 @@ void MainWindow::listerIngredients(QString recette){
         composantNombreDome->setEditable(false);
         QList<QStandardItem*> composant;
 
-        if (farming == "true"){
+        if (param.getFarming()){
             QString nomPlante = "";
             double nombrePlant, nombrePlantParDome = 13;
             int nombrePlantEntier, nombreDomeEntier, quantiteeParPlant = 0;
@@ -453,11 +446,11 @@ void MainWindow::listerIngredients(QString recette){
             composantNom->setText(ressourcesNom.at(i));
         }
         // On définis nos Items
-        composantNom->setIcon(QIcon(imagePath+ressourcesIcone.at(i)));
+        composantNom->setIcon(QIcon(param.getImagePath()+ressourcesIcone.at(i)));
         composantQuantite->setText(QString::number(ressourcesQuantite.at(i)));
 
         // On ajoute dans le modele
-        if (farming == "true"){
+        if (param.getFarming()){
             composant << composantNom << composantQuantite << composantNombrePlants << composantNombreDome;
         } else {
             composant << composantNom << composantQuantite;
@@ -466,7 +459,7 @@ void MainWindow::listerIngredients(QString recette){
     }
 
     // On définis l'en-tête de la vue et lui définis son modèle
-    if (farming == "true"){
+    if (param.getFarming()){
         header << "Nom" << "Quantité" << "Nombre Plant" << "Nombre Dome";
     } else {
         header << "Nom" << "Quantité";
@@ -490,7 +483,7 @@ void MainWindow::listerIngredients(QString recette){
      *      2. On récupère son idex
      *      3. S'il n'est pas vide, on l'agrandi.
      */
-    if (itemExpanded.count() != 0 && autoExpand == "false"){
+    if (itemExpanded.count() != 0 && !param.getAutoExpand()){
         QList<QStandardItem *> rootList;
         for (int item = 0; item < itemExpanded.count(); item++){
             rootList = modele->findItems(itemExpanded.at(item), Qt::MatchRecursive);
@@ -499,7 +492,7 @@ void MainWindow::listerIngredients(QString recette){
             if (!Items.isEmpty())
                 ui->vue->setExpanded(Items.first(), true);
         }
-    } else if (autoExpand == "true") {
+    } else if (param.getAutoExpand()) {
         ui->vue->expandAll();
     }
 
@@ -509,6 +502,7 @@ void MainWindow::listerIngredients(QString recette){
  * Fonction qui met le texte du bouton à 'Actualiser' si on change la quantité et qu'il y a des items dans le modele
  */
 void MainWindow::modifierQuantite(int valeur){
+    valeur += 0;
     if (recetteSelectionne != "" && modele->hasChildren()){
         ui->pbRecherche->setText("Actualiser");
     }
@@ -516,33 +510,53 @@ void MainWindow::modifierQuantite(int valeur){
 
 /*
  * Fonction pour la case à cocher si on veut les données de farming (Plant + Dome) ou pas.
+ * -- Depuis le bouton
  */
-void MainWindow::setFarming(int state){
+void MainWindow::setFarmingFromButton(int state){
     if (state == 0){
         //unchecked
-        settings->setValue("utilisateur/farming", "false");
-        farming = "false";
+        param.setFarming(false);
+        ui->aFarming->setChecked(false);
     } else if (state == 2) {
         //checked
-        settings->setValue("utilisateur/farming", "true");
-        farming = "true";
+        param.setFarming(true);
+        ui->aFarming->setChecked(true);
     }
+}
+
+/*
+ * Fonction pour la case à cocher si on veut les données de farming (Plant + Dome) ou pas.
+ * -- Depuis le menu
+ */
+void MainWindow::setFarmingFromMenu(bool state){
+    param.setFarming(state);
+    ui->cbFarming->setChecked(state);
 }
 
 
 /*
  * Fonction pour la case à cocher si on veut l'étendu automatique ou pas.
+ * -- Depuis le bouton
  */
-void MainWindow::setAutoExpand(int state){
+void MainWindow::setAutoExpandFromButton(int state){
     if (state == 0){
         //unchecked
-        settings->setValue("utilisateur/autoExpand", "false");
-        autoExpand = "false";
+        param.setAutoExpand(false);
+        ui->cbAutoExpand->setChecked(false);
     } else if (state == 2) {
         //checked
-        settings->setValue("utilisateur/autoExpand", "true");
-        autoExpand = "true";
+        param.setAutoExpand(true);
+        ui->cbAutoExpand->setChecked(true);
     }
+}
+
+/*
+ * Fonction pour la case à cocher si on veut l'étendu automatique ou pas.
+ * -- Depuis le menu
+ */
+void MainWindow::setAutoExpandFromMenu(bool state){
+    param.setAutoExpand(state);
+    ui->cbAutoExpand->setChecked(state);
 }
 
 /*
@@ -553,13 +567,44 @@ void MainWindow::pourTout(QAbstractItemModel* modele, QModelIndex parent){
         QModelIndex index = modele->index(r, 0, parent);
         QVariant name = modele->data(index);
 
-        if (ui->vue->isExpanded(index)){
-            itemExpanded << index.data(Qt::DisplayRole).toString();
-        }
-
-        // Si l'item a des enfants, on rappel la même fonction pour boucler.
+        /*
+         * Si l'item a des enfants, on rappel la même fonction pour boucler.
+         * Si en plus il est étendu, on l'ajoute à la liste.
+         *      On ne le fait qu'à ce moment là, car s'il n'a pas d'enfants et qu'on l'ajoute à la liste
+         *      et que l'utilisateur à switcher les données de farming,
+         *      lors de l'étendu semi-auto, le programme plante.
+         */
         if(modele->hasChildren(index) ) {
+            if (ui->vue->isExpanded(index)){
+                itemExpanded << index.data(Qt::DisplayRole).toString();
+            }
             pourTout(modele, index);
         }
     }
+}
+
+void MainWindow::ouvrirFenAjouterRecette()
+{
+    if (!getEtatFenAjouterRecette()){
+        fenAjouterRecette = new ajouterRecette(this); // Be sure to destroy your window somewhere
+        setEtatFenAjouterRecette(true);
+        fenAjouterRecette->show();
+        connect(fenAjouterRecette, SIGNAL(finished(int)), this, SLOT(fenAjouterRecetteClose(int)));
+    } else {
+        QMessageBox::information(this, "Ajouter une recette", "La fenêtre pour ajouter une recette est déjà ouverte.");
+        fenAjouterRecette->raise();
+    }
+}
+
+bool MainWindow::getEtatFenAjouterRecette(){
+    return fenAjouterRecetteOuverte;
+}
+
+void MainWindow::setEtatFenAjouterRecette(bool stated){
+    fenAjouterRecetteOuverte = stated;
+}
+
+void MainWindow::fenAjouterRecetteClose(int result){
+    result += 0;
+    setEtatFenAjouterRecette(false);
 }
