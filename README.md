@@ -15,6 +15,10 @@ NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le framework [Qt 5.1.3][
 Pour la base de données j'utilise SQLite v3. A terme, pour que le logiciel soit le plus "communautaire" possible, je basculerais sur une base de données serveur (MariaDB - PostgreSQL étant surdimensionné pour la quantité de données aujourd'hui).
 Je ne suis pas partis sur cette solution tout de suite car je suis en pleins développement. De plus, héberger une base de données soit même aujourd'hui et beaucoup trop risqué [Ranswonware Serveur MySQL][ransonwareBDD]. De plus, cela coûtant de l'argent (serveur, nom de domaine et certificat SSL), je ne peux pas me permettre aujourd'hui de payer cela.
 
+![QtIDE](https://i.imgur.com/xNaFNefm.jpg)
+
+![SQLite](https://i.imgur.com/KcBvoNUm.jpg)
+
 ## A venir
 Voici une liste des choses que j'aimerais implémenter (incomplet) :
 - [ ] Utilisation d'une base de données serveur
