@@ -6,5 +6,8 @@
         <file>settings_24.png</file>
         <file>add_24.png</file>
         <file>close_24.png</file>
+        <file>details_24.png</file>
+        <file>mainPage_24.png</file>
+        <file>memorize_24.png</file>
     </qresource>
 </RCC>

@@ -9,7 +9,7 @@ A partir d'une recette, liste tous les composants nécessaires. Si les composant
 Finalement, toutes les ressources de base (Carbone, Solanium, etc.) sont listés pour obtenir le total pour la recette principale.
 Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi que le nombre de dome associé.
 
-![v0.1.4.1](https://i.imgur.com/oRX4pLf.jpg)
+![v0.1.4.2](https://i.imgur.com/LPkTEdz.jpg)
 
 ## Langages
 NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
@@ -103,6 +103,27 @@ Donc, voici les modification :
 * Ajout de commentaires dans le code
 
 ![v0.1.4.1](https://i.imgur.com/oRX4pLf.jpg)
+
+### **v0.1.4.2** - *10/08/2019*
+Bon, on avance sur la fenêtre d'ajout !
+J'ai mis tous les éléments, dans des onglets. Cela me parait plus claire dans deux onglets distincts. A vous de trancher !
+Voici le détails
+* Fenêtre '*Ajouter une recette*'
+	- Bouton Annuler
+	- Rechercher une icône
+        * Si cette dernière n'est pas dans le répertoire du programme, elle est copié. *C'est cette dernière qui sera utilisé*
+	- Pour le titre et le sous-titre, mis en place du compteur de caractère.
+	- Pour la quantité obtenue, valeur autorisé entre 1 et 5
+	- Pour les quantités nécessaire valeur autorisé entre 1 et 999
+* Fenêtre principale
+	- Ajouter d'une option '*Restaurer dernière recette ?*'
+		*Cette dernière vous permet de mémoriser la dernière recette visualisé avec la quantité lors de l'ouverture du programme.*
+* Modification diverse
+	- Utilisation d'une classe personnalisé pour l'accès à la base de données
+	- Ajout des infos nécessaires à la classe *settings* pour la mémorisation de la recette
+	- Fermeture de la connexion à la base de données lors de fermeture de fenêtre
+
+![v0.1.4.2](https://i.imgur.com/LPkTEdz.jpg)
 
 ## Divers
 **16/06/2019** - [Premier post sur le groupe][premierPost]

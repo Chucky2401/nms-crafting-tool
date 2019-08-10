@@ -28,12 +28,14 @@ RC_ICONS = NMS_101.ico
 
 SOURCES += \
         ajouterrecette.cpp \
+        database.cpp \
         main.cpp \
         mainwindow.cpp \
         settings.cpp
 
 HEADERS += \
         ajouterrecette.h \
+        database.h \
         mainwindow.h \
         settings.h
 

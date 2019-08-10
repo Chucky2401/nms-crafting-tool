@@ -24,6 +24,12 @@ settings::settings()
 
     autoExpand = this->getIniAutoExpand();
     this->setAutoExpand(autoExpand);
+
+    this->restoreRecipe = this->getIniRestoreRecipe();
+    this->setRestoreRecipe(restoreRecipe);
+
+    lastRecipe = this->getIniLastRecipe();
+    quantiteLastRecipe = this->getIniQteLastRecipe();
 }
 
 void settings::setImagePath(QString path){
@@ -89,4 +95,43 @@ bool settings::getIniAutoExpand(){
 
 bool settings::getAutoExpand(){
     return this->autoExpand;
+}
+
+void settings::setRestoreRecipe(bool enabled){
+    this->restoreRecipe = enabled;
+    iniParam->setValue("utilisateur/restoreRecipe", enabled);
+}
+
+bool settings::getIniRestoreRecipe(){
+    return iniParam->value("utilisateur/restoreRecipe").toBool();
+}
+
+bool settings::getRestoreRecipe(){
+    return this->restoreRecipe;
+}
+
+void settings::setLastRecipe(QString name){
+    this->lastRecipe = name;
+    iniParam->setValue("utilisateur/LastRecipe", name);
+}
+
+QString settings::getLastRecipe(){
+    return this->lastRecipe;
+}
+
+QString settings::getIniLastRecipe(){
+    return iniParam->value("utilisateur/LastRecipe", settingDefaultString).toString();
+}
+
+void settings::setQteLastRecipe(int quantite){
+    this->quantiteLastRecipe = quantite;
+    iniParam->setValue("utilisateur/quantiteLastRecipe", quantite);
+}
+
+int settings::getIniQteLastRecipe(){
+    return iniParam->value("utilisateur/quantiteLastRecipe", settingDefaultInt).toInt();
+}
+
+int settings::getQteLastRecipe(){
+    return iniParam->value("utilisateur/quantiteLastRecipe", settingDefaultInt).toInt();
 }

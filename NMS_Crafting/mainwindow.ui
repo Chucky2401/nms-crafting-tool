@@ -364,18 +364,20 @@
     </property>
     <addaction name="aAjouterRecette"/>
    </widget>
-   <widget class="QMenu" name="menu_Outil">
+   <widget class="QMenu" name="mOutil">
     <property name="title">
      <string>&amp;Outil</string>
     </property>
     <addaction name="aPreferences"/>
     <addaction name="separator"/>
-    <addaction name="aFarming"/>
+    <addaction name="aRestoreRecipe"/>
+    <addaction name="separator"/>
     <addaction name="aAutoExpand"/>
+    <addaction name="aFarming"/>
    </widget>
    <addaction name="mFichier"/>
    <addaction name="mEditer"/>
-   <addaction name="menu_Outil"/>
+   <addaction name="mOutil"/>
   </widget>
   <action name="aQuitter">
    <property name="icon">
@@ -432,6 +434,18 @@
    </property>
    <property name="text">
     <string>Etendre automatiquement ?</string>
+   </property>
+  </action>
+  <action name="aRestoreRecipe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/memorize_24.png</normaloff>:/memorize_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Restaurer dernière recette ?</string>
    </property>
   </action>
  </widget>

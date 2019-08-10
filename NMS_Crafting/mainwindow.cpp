@@ -13,23 +13,49 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cbAutoExpand->setChecked(param.getAutoExpand());
     ui->aAutoExpand->setChecked(param.getAutoExpand());
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    if (createConnection()){
+    ui->aRestoreRecipe->setChecked(param.getRestoreRecipe());
+
+    bool test = bdd.createConnection(connectionName);
+    if(!test){
+        QString lastBddError = bdd.getError();
+        QMessageBox::critical(this, "Connexion à la BDD", "Echec de la connexion à la Base de Données.\nDétails:\n"+bdd.getError());
+        ui->centralWidget->setEnabled(false);
+        ui->mEditer->setEnabled(false);
+        ui->mOutil->setEnabled(false);
+    } else {
         listeRecettes();
     }
 
     modele = new QStandardItemModel();
     setEtatFenAjouterRecette(false);
 
+    /*
+     * Connecteurs !
+     */
     connect(ui->qcbListeRecettes, SIGNAL(currentIndexChanged(int)), this, SLOT(recetteChoisis(int)));
     connect(ui->pbRecherche, SIGNAL(clicked()), this, SLOT(clickListerIngredients()));
     connect(ui->sbQuantite, SIGNAL(valueChanged(int)), this, SLOT(modifierQuantite(int)));
     connect(ui->cbFarming, SIGNAL(stateChanged(int)), this, SLOT(setFarmingFromButton(int)));
-    connect(ui->aFarming, SIGNAL(toggled(bool)), this, SLOT(setFarmingFromMenu(bool)));
     connect(ui->cbAutoExpand, SIGNAL(stateChanged(int)), this, SLOT(setAutoExpandFromButton(int)));
+    connect(ui->aAjouterRecette, SIGNAL(triggered()), this, SLOT(ouvrirFenAjouterRecette()));
+    connect(ui->aRestoreRecipe, SIGNAL(toggled(bool)), this, SLOT(setRestoreRecipeFromMenu(bool)));
+    connect(ui->aFarming, SIGNAL(toggled(bool)), this, SLOT(setFarmingFromMenu(bool)));
     connect(ui->aAutoExpand, SIGNAL(toggled(bool)), this, SLOT(setAutoExpandFromMenu(bool)));
     connect(ui->aQuitter, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->aAjouterRecette, SIGNAL(triggered()), this, SLOT(ouvrirFenAjouterRecette()));
+
+    /*
+     * Restaure la dernière recette si voulu par l'utilisateur et que la recette est défins dans le .ini
+     */
+    if (param.getRestoreRecipe() && param.getLastRecipe() != "DNE"){
+//        qDebug() << param.getLastRecipe();
+        int index = ui->qcbListeRecettes->findData(param.getLastRecipe());
+//        qDebug() << index;
+        if (index != -1) {
+            ui->qcbListeRecettes->setCurrentIndex(index);
+            ui->sbQuantite->setValue(param.getQteLastRecipe());
+            emit ui->pbRecherche->clicked();
+        }
+    }
 }
 
 /*
@@ -37,7 +63,8 @@ MainWindow::MainWindow(QWidget *parent) :
  */
 MainWindow::~MainWindow()
 {
-    db.close();
+    if (bdd.isOpen(connectionName))
+        bdd.closeConnection(connectionName);
     if (getEtatFenAjouterRecette())
         fenAjouterRecette->close();
     delete ui;
@@ -50,6 +77,8 @@ void MainWindow::closeEvent(QCloseEvent *event){
     if (QMessageBox::question(this, "Fermeture", "Voulez-vous fermer le programme ?") == QMessageBox::Yes){
         if (getEtatFenAjouterRecette())
             fenAjouterRecette->close();
+        if (bdd.isOpen(connectionName))
+            bdd.closeConnection(connectionName);
         event->accept();
     } else {
         event->ignore();
@@ -75,7 +104,7 @@ bool MainWindow::createConnection()
  */
 void MainWindow::listeRecettes()
 {
-    QSqlQuery query;
+    QSqlQuery query(bdd.getBase());
     int recetteNiveau = 0;
 
     // On vide le champ avant de le remplir
@@ -99,7 +128,6 @@ void MainWindow::listeRecettes()
                 ui->qcbListeRecettes->addItem("--- Niveau "+QString::number(recetteNiveau)+" ---", "NOTHING");
             }
 
-
             ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, nomRecetteFr);
         }
     }else{
@@ -113,7 +141,7 @@ void MainWindow::listeRecettes()
  */
 void MainWindow::recetteChoisis(int index){
     index += 0;
-    QSqlQuery query;
+    QSqlQuery query(bdd.getBase());
     QString recette = ui->qcbListeRecettes->currentData().toString();
 
     ui->qcbListeRecettes->setToolTip("");
@@ -145,6 +173,10 @@ void MainWindow::recetteChoisis(int index){
             }
         }
         ui->pbRecherche->setEnabled(true);
+
+//        if (param.getRestoreRecipe()){
+            param.setLastRecipe(recette);
+//        }
     }
 
 }
@@ -186,7 +218,7 @@ void MainWindow::listerIngredients(QString recette){
     QList<QStandardItem*> root;
     QStringList header;
 
-    QSqlQuery query;
+    QSqlQuery query(bdd.getBase());
     QString sql = "", quantiteSql, nomIcone;
 
     QVector<QString> recettes, recettesTemp, ressourcesNom, ressourcesIcone, ressourcesID;
@@ -506,6 +538,7 @@ void MainWindow::modifierQuantite(int valeur){
     if (recetteSelectionne != "" && modele->hasChildren()){
         ui->pbRecherche->setText("Actualiser");
     }
+    param.setQteLastRecipe(ui->sbQuantite->value());
 }
 
 /*
@@ -531,6 +564,10 @@ void MainWindow::setFarmingFromButton(int state){
 void MainWindow::setFarmingFromMenu(bool state){
     param.setFarming(state);
     ui->cbFarming->setChecked(state);
+}
+
+void MainWindow::setRestoreRecipeFromMenu(bool state){
+    param.setRestoreRecipe(state);
 }
 
 

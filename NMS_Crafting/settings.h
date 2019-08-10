@@ -31,6 +31,18 @@ public:
     bool getIniAutoExpand();
     bool getAutoExpand();
 
+    void setRestoreRecipe(bool enabled);
+    bool getIniRestoreRecipe();
+    bool getRestoreRecipe();
+
+    void setLastRecipe(QString name);
+    QString getIniLastRecipe();
+    QString getLastRecipe();
+
+    void setQteLastRecipe(int quantite);
+    int getIniQteLastRecipe();
+    int getQteLastRecipe();
+
 private:
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
@@ -42,6 +54,9 @@ private:
     QString bddName;
     bool farming;
     bool autoExpand;
+    bool restoreRecipe;
+    QString lastRecipe;
+    int quantiteLastRecipe;
 };
 
 #endif // SETTINGS_H

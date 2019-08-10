@@ -27,6 +27,7 @@
 #include <QDebug>
 
 #include "settings.h"
+#include "database.h"
 #include "ajouterrecette.h"
 
 namespace Ui {
@@ -58,6 +59,7 @@ public slots:
     void setFarmingFromMenu(bool state);
     void setAutoExpandFromButton(int state);
     void setAutoExpandFromMenu(bool state);
+    void setRestoreRecipeFromMenu(bool state);
     void ouvrirFenAjouterRecette();
     void fenAjouterRecetteClose(int result);
 
@@ -67,6 +69,7 @@ private:
     bool fenAjouterRecetteOuverte;
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
+    const QString connectionName = "principal";
 
     Ui::MainWindow *ui;
     QSqlDatabase db;
@@ -78,6 +81,7 @@ private:
     QStringList itemExpanded;
 
     class settings param;
+    class database bdd;
 };
 
 #endif // MAINWINDOW_H
