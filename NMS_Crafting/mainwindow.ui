@@ -371,6 +371,7 @@
     <addaction name="aPreferences"/>
     <addaction name="separator"/>
     <addaction name="aRestoreRecipe"/>
+    <addaction name="aRestaurerTaillePosition"/>
     <addaction name="separator"/>
     <addaction name="aAutoExpand"/>
     <addaction name="aFarming"/>
@@ -421,7 +422,7 @@
      <normaloff>:/farming_24.png</normaloff>:/farming_24.png</iconset>
    </property>
    <property name="text">
-    <string>Farming ?</string>
+    <string>Afficher données de farm</string>
    </property>
   </action>
   <action name="aAutoExpand">
@@ -433,7 +434,7 @@
      <normaloff>:/expand_24.png</normaloff>:/expand_24.png</iconset>
    </property>
    <property name="text">
-    <string>Etendre automatiquement ?</string>
+    <string>Etendre automatiquement</string>
    </property>
   </action>
   <action name="aRestoreRecipe">
@@ -445,7 +446,19 @@
      <normaloff>:/memorize_24.png</normaloff>:/memorize_24.png</iconset>
    </property>
    <property name="text">
-    <string>Restaurer dernière recette ?</string>
+    <string>Restaurer dernière recette</string>
+   </property>
+  </action>
+  <action name="aRestaurerTaillePosition">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/size_24.png</normaloff>:/size_24.png</iconset>
+   </property>
+   <property name="text">
+    <string>Restaurer taille &amp;&amp; position</string>
    </property>
   </action>
  </widget>

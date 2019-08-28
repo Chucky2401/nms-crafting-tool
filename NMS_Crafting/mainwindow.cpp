@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ouvertureEnCours = true;
 
     ui->cbFarming->setChecked(param.getFarming());
     ui->aFarming->setChecked(param.getFarming());
@@ -14,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->aAutoExpand->setChecked(param.getAutoExpand());
 
     ui->aRestoreRecipe->setChecked(param.getRestoreRecipe());
+    ui->aRestaurerTaillePosition->setChecked(param.getRestoreSizePos());
 
     bool test = bdd.createConnection(connectionName);
     if(!test){
@@ -39,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->cbAutoExpand, SIGNAL(stateChanged(int)), this, SLOT(setAutoExpandFromButton(int)));
     connect(ui->aAjouterRecette, SIGNAL(triggered()), this, SLOT(ouvrirFenAjouterRecette()));
     connect(ui->aRestoreRecipe, SIGNAL(toggled(bool)), this, SLOT(setRestoreRecipeFromMenu(bool)));
+    connect(ui->aRestaurerTaillePosition, SIGNAL(toggled(bool)), this, SLOT(setRestoreSizePosFromMenu(bool)));
     connect(ui->aFarming, SIGNAL(toggled(bool)), this, SLOT(setFarmingFromMenu(bool)));
     connect(ui->aAutoExpand, SIGNAL(toggled(bool)), this, SLOT(setAutoExpandFromMenu(bool)));
     connect(ui->aQuitter, SIGNAL(triggered()), this, SLOT(close()));
@@ -56,6 +59,15 @@ MainWindow::MainWindow(QWidget *parent) :
             emit ui->pbRecherche->clicked();
         }
     }
+
+    if (param.getRestoreSizePos()) {
+        if(param.getEtat() != "DNE" && param.getGeometrie() != "DNE") {
+            this->restoreGeometry(param.getGeometrie());
+            this->restoreState(param.getEtat());
+        }
+    }
+
+    ouvertureEnCours = false;
 }
 
 /*
@@ -77,8 +89,13 @@ void MainWindow::closeEvent(QCloseEvent *event){
     if (QMessageBox::question(this, "Fermeture", "Voulez-vous fermer le programme ?") == QMessageBox::Yes){
         if (getEtatFenAjouterRecette())
             fenAjouterRecette->close();
+
         if (bdd.isOpen(connectionName))
             bdd.closeConnection(connectionName);
+
+        if (param.getRestoreSizePos())
+            param.setGeometrieEtat(saveGeometry(), saveState());
+
         event->accept();
     } else {
         event->ignore();
@@ -111,7 +128,7 @@ void MainWindow::listeRecettes()
     ui->qcbListeRecettes->clear();
 
     ui->qcbListeRecettes->addItem("*** Choisir une Recette ***", "NOTHING");
-    if(query.exec("SELECT DISTINCT recette_nom_fr, recette_description_courte, recette_niveau, recette_icone FROM Recettes ORDER BY recette_niveau, recette_nom_fr")){
+    if(query.exec("SELECT DISTINCT recette_nom_fr, recette_description_courte, recette_niveau, recette_icone FROM Recettes GROUP BY recette_nom_fr ORDER BY recette_niveau, recette_nom_fr")){
         while(query.next()){
             QString nomRecetteFr = query.value("recette_nom_fr").toString(), nomRecetteAffichage = "";
             int niveauRecette = query.value("recette_niveau").toInt();
@@ -213,6 +230,7 @@ void MainWindow::listerIngredients(QString recette){
      * On définis les variables
      */
     modele->clear();
+    bool donneesFarmTrouvee = false;
     QStandardItem *rootNom = new QStandardItem(recette);
     QStandardItem *rootQuantite = new QStandardItem();
     QList<QStandardItem*> root;
@@ -222,7 +240,7 @@ void MainWindow::listerIngredients(QString recette){
     QString sql = "", quantiteSql, nomIcone;
 
     QVector<QString> recettes, recettesTemp, ressourcesNom, ressourcesIcone, ressourcesID;
-    QVector<int> niveaux, niveauxTemp, ressourcesQuantite;
+    QVector<int> niveaux, niveauxTemp, ressourcesQuantite, precedenteQuantite, precedenteQuantiteTemp;
 
     int niveau = 1, i = 0, sizeToRemove = 0, quantiteRecette = ui->sbQuantite->value();
 
@@ -230,17 +248,24 @@ void MainWindow::listerIngredients(QString recette){
     rootQuantite->setText(quantiteSql);
 
     /*
-     * On va chercher le niveau et l'icone de la recette
+     * On va chercher le niveau MAX et l'icone de la recette
      */
-    query.exec("SELECT DISTINCT recette_niveau, recette_icone FROM Recettes WHERE recette_nom_fr =  \""+recette+"\"");
+    query.exec("SELECT DISTINCT MAX(recette_niveau) recette_niveau, recette_icone FROM Recettes WHERE recette_nom_fr =  \""+recette+"\"");
     while(query.next()){
         niveau = query.value("recette_niveau").toInt();
         nomIcone = query.value("recette_icone").toString();
     }
 
     // On ajoute la recette et le niveau dans deux QVector
-    recettes.push_back(recette);
-    niveaux.push_back(niveau);
+    /*
+     * On doit aller chercher les niveaux de la recette.
+     */
+    query.exec("SELECT DISTINCT recette_niveau FROM Recettes WHERE recette_nom_fr =  \""+recette+"\"");
+    while(query.next()) {
+        recettes.push_back(recette);
+        niveaux.push_back(query.value("recette_niveau").toInt());
+        precedenteQuantite.push_back(1);
+    }
 
     // On ajoute notre recette à notre modèle
     rootNom->setEditable(false);
@@ -279,7 +304,8 @@ void MainWindow::listerIngredients(QString recette){
                           Recettes r1 \
                       LEFT JOIN Recettes r2 ON r2.id = r1.recette_composant_id \
                       WHERE \
-                          r1.recette_nom_fr = \""+recettes.at(i)+"\"";
+                          r1.recette_nom_fr = \""+recettes.at(i)+"\" \
+                      AND r1.recette_niveau = \""+QString::number(niveaux.at(i))+"\"";
             } else {
                 sql = "SELECT DISTINCT \
                       re.recette_nom_fr \
@@ -294,7 +320,8 @@ void MainWindow::listerIngredients(QString recette){
                     Recettes re \
                 LEFT JOIN Ressources_Listes rl ON rl.id = re.recette_composant_id \
                 WHERE \
-                    re.recette_nom_fr = \""+recettes.at(i)+"\"";
+                    re.recette_nom_fr = \""+recettes.at(i)+"\" \
+                AND re.recette_niveau = \""+QString::number(niveaux.at(i))+"\"";
             }
 
             /*
@@ -328,7 +355,7 @@ void MainWindow::listerIngredients(QString recette){
                     composantNom->setText(nomComposant);
                     composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
                     composantQuantite->setText(quantiteSql);
-                } else {
+                }// else {
                     /*
                      * Variables
                      */
@@ -342,9 +369,9 @@ void MainWindow::listerIngredients(QString recette){
                      * Suivant le resultat de la requête pour la quantite obtenue, le calcul diffère
                      */
                     if (quantiteObtenu > 1){
-                        floatQuantite = static_cast<double>(quantiteRecette) / quantiteObtenu * static_cast<double>(quantiteNecessaire);
+                        floatQuantite = static_cast<double>(quantiteRecette) / quantiteObtenu * static_cast<double>(quantiteNecessaire) * static_cast<double>(precedenteQuantiteTemp.at(i));
                     } else {
-                        floatQuantite = quantiteObtenu * quantiteRecette * quantiteNecessaire;
+                        floatQuantite = quantiteObtenu * quantiteRecette * quantiteNecessaire * precedenteQuantite.at(i);
                     }
 
                     /*
@@ -353,26 +380,34 @@ void MainWindow::listerIngredients(QString recette){
                     floatQuantite = ceil(floatQuantite);
                     intQuantite = static_cast<int>(floatQuantite);
                     quantite = QString::number(intQuantite);
+                    if (quantiteNecessaire != 1) {
+                        precedenteQuantiteTemp.push_back(intQuantite);
+                    } else {
+                        precedenteQuantiteTemp.push_back(1);
+                    }
 
                     /*
-                     * Ici, on va chercher dans le QVector reesourcesNom, si le composant est présent.
+                     * Ici, on va chercher dans le QVector resourcesNom, si le composant est présent.
                      *      Présent     : On ajoute la quantité obtenue à la précédente
                      *      Non-Présent : On ajoute dans le QVector
                      */
-                    int positionVecteur = ressourcesNom.indexOf(nomComposant);
-                    if (positionVecteur == -1) {
-                        ressourcesNom.append(nomComposant);
-                        ressourcesQuantite.append(intQuantite);
-                        ressourcesIcone.append(iconeComposant);
-                        ressourcesID.append(query.value("ID_Ressources").toString());
-                    } else {
-                        ressourcesQuantite[positionVecteur] = ressourcesQuantite[positionVecteur] + intQuantite;
+                    if (niveauComposant == 0) {
+
+                        int positionVecteur = ressourcesNom.indexOf(nomComposant);
+                        if (positionVecteur == -1) {
+                            ressourcesNom.append(nomComposant);
+                            ressourcesQuantite.append(intQuantite);
+                            ressourcesIcone.append(iconeComposant);
+                            ressourcesID.append(query.value("ID_Ressources").toString());
+                        } else {
+                            ressourcesQuantite[positionVecteur] = ressourcesQuantite[positionVecteur] + intQuantite;
+                        }
                     }
 
                     composantNom->setText(nomComposant);
                     composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
                     composantQuantite->setText(quantite);
-                }
+                //}
                 // On ajoute nos résultats au parents
                 QList<QStandardItem*> composant;
                 composant << composantNom << composantQuantite;
@@ -394,18 +429,21 @@ void MainWindow::listerIngredients(QString recette){
         for (i = 0; i < sizeToRemove; i++){
             recettes.remove(0);
             niveaux.remove(0);
+            precedenteQuantite.remove(0);
         }
 
         if (recettesTemp.size() != 0) {
             for (i = 0; i < recettesTemp.size(); i++) {
                 recettes.push_back(recettesTemp.at(i));
                 niveaux.push_back(niveauxTemp.at(i));
+                precedenteQuantite.push_back(precedenteQuantiteTemp.at(i));
             }
 
             sizeToRemove = recettesTemp.size();
             for (i = 0; i < sizeToRemove; i++) {
                 recettesTemp.remove(0);
                 niveauxTemp.remove(0);
+                precedenteQuantiteTemp.remove(0);
             }
 
         } else {
@@ -460,6 +498,7 @@ void MainWindow::listerIngredients(QString recette){
                 nomPlante = query.value("nom_plante").toString();
                 quantiteeParPlant = query.value("quantitee_par_plant").toInt();
             }
+
             // Quantite par plante sous forme d'entier
             if (quantiteeParPlant != 0){
                 nombrePlant = ceil(ressourcesQuantite.at(i)/quantiteeParPlant);
@@ -473,7 +512,13 @@ void MainWindow::listerIngredients(QString recette){
 
             composantNombrePlants->setText(QString::number(nombrePlantEntier));
             composantNombreDome->setText(QString::number(nombreDomeEntier));
-            composantNom->setText(ressourcesNom.at(i)+" ("+nomPlante+")");
+
+            if (nomPlante != ""){
+                composantNom->setText(ressourcesNom.at(i)+" ("+nomPlante+")");
+                donneesFarmTrouvee = true;
+            } else{
+                composantNom->setText(ressourcesNom.at(i));
+            }
         } else {
             composantNom->setText(ressourcesNom.at(i));
         }
@@ -491,8 +536,9 @@ void MainWindow::listerIngredients(QString recette){
     }
 
     // On définis l'en-tête de la vue et lui définis son modèle
-    if (param.getFarming()){
+    if (param.getFarming() && donneesFarmTrouvee){
         header << "Nom" << "Quantité" << "Nombre Plant" << "Nombre Dome";
+        //header << "Nom" << "Quantité";
     } else {
         header << "Nom" << "Quantité";
     }
@@ -528,6 +574,9 @@ void MainWindow::listerIngredients(QString recette){
         ui->vue->expandAll();
     }
 
+    if(!donneesFarmTrouvee && !ouvertureEnCours){
+        QMessageBox::critical(this, "Données de Farm", "Aucune données de farm trouvée.");
+    }
 }
 
 /*
@@ -566,10 +615,21 @@ void MainWindow::setFarmingFromMenu(bool state){
     ui->cbFarming->setChecked(state);
 }
 
+/*
+ * Fonction pour la case à cocher si on veut restaurer la recette à l'ouverture.
+ * -- Depuis le menu
+ */
 void MainWindow::setRestoreRecipeFromMenu(bool state){
     param.setRestoreRecipe(state);
 }
 
+/*
+ * Fonction pour la case à cocher si on veut restaurer la taille et la position de la fenêtre à l'ouverture.
+ * -- Depuis le menu
+ */
+void MainWindow::setRestoreSizePosFromMenu(bool state){
+    param.setRestoreSizePos(state);
+}
 
 /*
  * Fonction pour la case à cocher si on veut l'étendu automatique ou pas.

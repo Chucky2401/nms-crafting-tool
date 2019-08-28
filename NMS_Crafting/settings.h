@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QString>
 #include <QVariant>
+#include <QByteArray>
 #include <QDebug>
 
 
@@ -43,10 +44,23 @@ public:
     int getIniQteLastRecipe();
     int getQteLastRecipe();
 
+    void setGeometrie(QByteArray geometrie);
+    void setEtat(QByteArray etat);
+    void setGeometrieEtat(QByteArray geometrie, QByteArray etat);
+    QByteArray getIniGeometrie();
+    QByteArray getGeometrie();
+    QByteArray getIniEtat();
+    QByteArray getEtat();
+
+    void setRestoreSizePos(bool enabled);
+    bool getIniRestoreSizePos();
+    bool getRestoreSizePos();
+
 private:
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
     const QVariant settingDefaultBool = false;
+    const QVariant settingDefaultByteArray = "DNE";
 
     QSettings *iniParam;
     QString imagePath;
@@ -57,6 +71,9 @@ private:
     bool restoreRecipe;
     QString lastRecipe;
     int quantiteLastRecipe;
+    QByteArray geometrie;
+    QByteArray etat;
+    bool restoreSizePos;
 };
 
 #endif // SETTINGS_H

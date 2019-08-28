@@ -25,11 +25,16 @@ settings::settings()
     autoExpand = this->getIniAutoExpand();
     this->setAutoExpand(autoExpand);
 
-    this->restoreRecipe = this->getIniRestoreRecipe();
+    restoreRecipe = this->getIniRestoreRecipe();
     this->setRestoreRecipe(restoreRecipe);
 
     lastRecipe = this->getIniLastRecipe();
     quantiteLastRecipe = this->getIniQteLastRecipe();
+
+    geometrie = this->getIniGeometrie();
+    etat = this->getIniEtat();
+    restoreSizePos = this->getIniRestoreSizePos();
+    this->setRestoreSizePos(restoreSizePos);
 }
 
 void settings::setImagePath(QString path){
@@ -77,7 +82,7 @@ void settings::setFarming(bool enabled){
 }
 
 bool settings::getIniFarming(){
-    return iniParam->value("utilisateur/farming").toBool();
+    return iniParam->value("utilisateur/farming", settingDefaultBool).toBool();
 }
 
 bool settings::getFarming(){
@@ -90,7 +95,7 @@ void settings::setAutoExpand(bool enabled){
 }
 
 bool settings::getIniAutoExpand(){
-    return iniParam->value("utilisateur/autoExpand").toBool();
+    return iniParam->value("utilisateur/autoExpand", settingDefaultBool).toBool();
 }
 
 bool settings::getAutoExpand(){
@@ -103,7 +108,7 @@ void settings::setRestoreRecipe(bool enabled){
 }
 
 bool settings::getIniRestoreRecipe(){
-    return iniParam->value("utilisateur/restoreRecipe").toBool();
+    return iniParam->value("utilisateur/restoreRecipe", settingDefaultBool).toBool();
 }
 
 bool settings::getRestoreRecipe(){
@@ -133,5 +138,51 @@ int settings::getIniQteLastRecipe(){
 }
 
 int settings::getQteLastRecipe(){
-    return iniParam->value("utilisateur/quantiteLastRecipe", settingDefaultInt).toInt();
+    return this->quantiteLastRecipe;
+}
+
+void settings::setGeometrie(QByteArray geometrie){
+    this->geometrie = geometrie;
+    iniParam->setValue("fenetre/geometrie", geometrie);
+}
+
+void settings::setEtat(QByteArray etat){
+    this->etat = etat;
+    iniParam->setValue("fenetre/etat", etat);
+}
+
+void settings::setGeometrieEtat(QByteArray geometrie, QByteArray etat){
+    this->geometrie = geometrie;
+    this->etat = etat;
+    iniParam->setValue("fenetre/geometry", geometrie);
+    iniParam->setValue("fenetre/state", etat);
+}
+
+QByteArray settings::getIniGeometrie(){
+    return iniParam->value("fenetre/geometry", settingDefaultByteArray).toByteArray();
+}
+
+QByteArray settings::getGeometrie(){
+    return this->geometrie;
+}
+
+QByteArray settings::getIniEtat(){
+    return iniParam->value("fenetre/state", settingDefaultByteArray).toByteArray();
+}
+
+QByteArray settings::getEtat(){
+    return this->etat;
+}
+
+void settings::setRestoreSizePos(bool enabled){
+    this->restoreSizePos = enabled;
+    iniParam->setValue("fenetre/restoreSizePos", enabled);
+}
+
+bool settings::getIniRestoreSizePos(){
+    return iniParam->value("fenetre/restoreSizePos", settingDefaultBool).toBool();
+}
+
+bool settings::getRestoreSizePos(){
+    return this->restoreSizePos;
 }

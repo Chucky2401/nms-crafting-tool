@@ -291,7 +291,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="cbComposant3"/>
+          <widget class="QComboBox" name="cbComposant3">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="insertPolicy">
+            <enum>QComboBox::NoInsert</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="hlQteComposant3">
@@ -311,7 +318,7 @@
            <item>
             <widget class="QSpinBox" name="sbQteComposant3">
              <property name="cursor">
-              <cursorShape>SizeVerCursor</cursorShape>
+              <cursorShape>ArrowCursor</cursorShape>
              </property>
              <property name="maximum">
               <number>999</number>
@@ -389,7 +396,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="cbComposant2"/>
+          <widget class="QComboBox" name="cbComposant2">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="insertPolicy">
+            <enum>QComboBox::NoInsert</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="hlQtComposant2">
@@ -409,7 +423,7 @@
            <item>
             <widget class="QSpinBox" name="sbQteComposant2">
              <property name="cursor">
-              <cursorShape>SizeVerCursor</cursorShape>
+              <cursorShape>ArrowCursor</cursorShape>
              </property>
              <property name="maximum">
               <number>999</number>
@@ -485,7 +499,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="cbComposant1"/>
+          <widget class="QComboBox" name="cbComposant1">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+           <property name="insertPolicy">
+            <enum>QComboBox::NoInsert</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" name="hlQt1">
@@ -505,7 +526,7 @@
            <item>
             <widget class="QSpinBox" name="sbQteComposant1">
              <property name="cursor">
-              <cursorShape>SizeVerCursor</cursorShape>
+              <cursorShape>ArrowCursor</cursorShape>
              </property>
              <property name="maximum">
               <number>999</number>

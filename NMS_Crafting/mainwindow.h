@@ -60,6 +60,7 @@ public slots:
     void setAutoExpandFromButton(int state);
     void setAutoExpandFromMenu(bool state);
     void setRestoreRecipeFromMenu(bool state);
+    void setRestoreSizePosFromMenu(bool state);
     void ouvrirFenAjouterRecette();
     void fenAjouterRecetteClose(int result);
 
@@ -67,6 +68,7 @@ public slots:
 private:
     ajouterRecette *fenAjouterRecette;
     bool fenAjouterRecetteOuverte;
+    bool ouvertureEnCours;
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
     const QString connectionName = "principal";
