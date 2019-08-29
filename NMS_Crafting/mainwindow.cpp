@@ -264,7 +264,8 @@ void MainWindow::listerIngredients(QString recette){
     while(query.next()) {
         recettes.push_back(recette);
         niveaux.push_back(query.value("recette_niveau").toInt());
-        precedenteQuantite.push_back(1);
+        //precedenteQuantite.push_back(1);
+        precedenteQuantite.push_back(quantiteRecette);
     }
 
     // On ajoute notre recette à notre modèle
@@ -337,8 +338,13 @@ void MainWindow::listerIngredients(QString recette){
                 composantNom->setEditable(false);
                 composantQuantite->setEditable(false);
                 QString nomComposant = query.value("Composant").toString();
-                int niveauComposant = query.value("Niveau_composant").toInt();
                 QString iconeComposant = query.value("NomIcone").toString();
+                QString quantite;
+                int niveauComposant = query.value("Niveau_composant").toInt();
+                int quantiteObtenu = query.value("recette_quantitee_obtenue").toInt();
+                int quantiteNecessaire = query.value("recette_quantitee_composant").toInt();
+                int intQuantite = 0;
+                double floatQuantite = 0.0;
 
                 // On va chercher le parents de notre futur entrée
                 rootList = modele->findItems(racine, Qt::MatchRecursive);
@@ -346,7 +352,7 @@ void MainWindow::listerIngredients(QString recette){
                 /*
                  * Si le composant n'est pas de niveau 0 on l'ajoute dans un tableau temporaire.
                  *  Cela car on va le mettre dans le tableau dans lequel on boucle  (for).
-                 * Dans le sinon, on va chercher la quantité final, les ressources n'ayant pas le même ratio.
+                 * Dans tous les cas, on va chercher la quantité final, les ressources n'ayant pas le même ratio.
                  */
                 if (niveauComposant != 0) {
                     recettesTemp.push_back(nomComposant);
@@ -355,59 +361,46 @@ void MainWindow::listerIngredients(QString recette){
                     composantNom->setText(nomComposant);
                     composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
                     composantQuantite->setText(quantiteSql);
-                }// else {
-                    /*
-                     * Variables
-                     */
-                    QString quantite;
-                    int intQuantite = 0;
-                    double floatQuantite = 0.0;
-                    int quantiteObtenu = query.value("recette_quantitee_obtenue").toInt();
-                    int quantiteNecessaire = query.value("recette_quantitee_composant").toInt();
+                }
 
-                    /*
-                     * Suivant le resultat de la requête pour la quantite obtenue, le calcul diffère
-                     */
-                    if (quantiteObtenu > 1){
-                        floatQuantite = static_cast<double>(quantiteRecette) / quantiteObtenu * static_cast<double>(quantiteNecessaire) * static_cast<double>(precedenteQuantiteTemp.at(i));
+                /*
+                 * Suivant le resultat de la requête pour la quantite obtenue, le calcul diffère
+                 */
+                if (quantiteObtenu > 1){
+                    floatQuantite = static_cast<double>(quantiteRecette) / quantiteObtenu * static_cast<double>(quantiteNecessaire) * static_cast<double>(precedenteQuantiteTemp.at(i));
+                } else {
+                    floatQuantite = quantiteObtenu * quantiteNecessaire * precedenteQuantite.at(i);
+                }
+
+                /*
+                 * On définis une quantite dans un entier
+                 */
+                floatQuantite = ceil(floatQuantite);
+                intQuantite = static_cast<int>(floatQuantite);
+                quantite = QString::number(intQuantite);
+                precedenteQuantiteTemp.push_back(intQuantite);
+
+                /*
+                 * Ici, on va chercher dans le QVector resourcesNom, si le composant est présent.
+                 *      Présent     : On ajoute la quantité obtenue à la précédente
+                 *      Non-Présent : On ajoute dans le QVector
+                 */
+                if (niveauComposant == 0) {
+
+                    int positionVecteur = ressourcesNom.indexOf(nomComposant);
+                    if (positionVecteur == -1) {
+                        ressourcesNom.append(nomComposant);
+                        ressourcesQuantite.append(intQuantite);
+                        ressourcesIcone.append(iconeComposant);
+                        ressourcesID.append(query.value("ID_Ressources").toString());
                     } else {
-                        floatQuantite = quantiteObtenu * quantiteRecette * quantiteNecessaire * precedenteQuantite.at(i);
+                        ressourcesQuantite[positionVecteur] = ressourcesQuantite[positionVecteur] + intQuantite;
                     }
+                }
 
-                    /*
-                     * On définis une quantite dans un entier
-                     */
-                    floatQuantite = ceil(floatQuantite);
-                    intQuantite = static_cast<int>(floatQuantite);
-                    quantite = QString::number(intQuantite);
-                    if (quantiteNecessaire != 1) {
-                        precedenteQuantiteTemp.push_back(intQuantite);
-                    } else {
-                        precedenteQuantiteTemp.push_back(1);
-                    }
-
-                    /*
-                     * Ici, on va chercher dans le QVector resourcesNom, si le composant est présent.
-                     *      Présent     : On ajoute la quantité obtenue à la précédente
-                     *      Non-Présent : On ajoute dans le QVector
-                     */
-                    if (niveauComposant == 0) {
-
-                        int positionVecteur = ressourcesNom.indexOf(nomComposant);
-                        if (positionVecteur == -1) {
-                            ressourcesNom.append(nomComposant);
-                            ressourcesQuantite.append(intQuantite);
-                            ressourcesIcone.append(iconeComposant);
-                            ressourcesID.append(query.value("ID_Ressources").toString());
-                        } else {
-                            ressourcesQuantite[positionVecteur] = ressourcesQuantite[positionVecteur] + intQuantite;
-                        }
-                    }
-
-                    composantNom->setText(nomComposant);
-                    composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
-                    composantQuantite->setText(quantite);
-                //}
+                composantNom->setText(nomComposant);
+                composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
+                composantQuantite->setText(quantite);
                 // On ajoute nos résultats au parents
                 QList<QStandardItem*> composant;
                 composant << composantNom << composantQuantite;
