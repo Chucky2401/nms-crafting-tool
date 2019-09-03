@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     /*
      * Restaure la dernière recette si voulu par l'utilisateur et que la recette est défins dans le .ini
      */
-    if (param.getRestoreRecipe() && param.getLastRecipe() != "DNE"){
+    if (param.getRestoreRecipe() && param.getLastRecipe().at(0).toString() != "DNE"){
 //        qDebug() << param.getLastRecipe();
         int index = ui->qcbListeRecettes->findData(param.getLastRecipe());
 //        qDebug() << index;
@@ -122,30 +122,44 @@ bool MainWindow::createConnection()
 void MainWindow::listeRecettes()
 {
     QSqlQuery query(bdd.getBase());
+    QSqlQuery qRecetteDesc(bdd.getBase());
     int recetteNiveau = 0;
 
     // On vide le champ avant de le remplir
     ui->qcbListeRecettes->clear();
 
     ui->qcbListeRecettes->addItem("*** Choisir une Recette ***", "NOTHING");
-    if(query.exec("SELECT DISTINCT recette_nom_fr, recette_description_courte, recette_niveau, recette_icone FROM Recettes GROUP BY recette_nom_fr ORDER BY recette_niveau, recette_nom_fr")){
+    if(query.exec("SELECT DISTINCT id, recette_nom_fr, recette_niveau, recette_icone FROM Recettes GROUP BY recette_nom_fr ORDER BY recette_niveau, recette_nom_fr")){
         while(query.next()){
             QString nomRecetteFr = query.value("recette_nom_fr").toString(), nomRecetteAffichage = "";
             int niveauRecette = query.value("recette_niveau").toInt();
             QString nomIcone = query.value("recette_icone").toString();
-            QString descriptionCourte = query.value("recette_description_courte").toString();
-            if (descriptionCourte != "") {
-                nomRecetteAffichage = nomRecetteFr + " (" + query.value("recette_description_courte").toString() + ")";
-            } else {
-                nomRecetteAffichage = nomRecetteFr;
-            }
 
             if (recetteNiveau != niveauRecette){
                 recetteNiveau = niveauRecette;
                 ui->qcbListeRecettes->addItem("--- Niveau "+QString::number(recetteNiveau)+" ---", "NOTHING");
             }
 
-            ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, nomRecetteFr);
+            if(qRecetteDesc.exec("SELECT DISTINCT recette_description_courte FROM Recettes WHERE recette_nom_fr = \""+nomRecetteFr+"\" ORDER BY recette_description_courte ASC")){
+                while(qRecetteDesc.next()){
+                    QString descriptionCourte = qRecetteDesc.value("recette_description_courte").toString();
+                    QList<QString> variantCombo;
+
+                    variantCombo << nomRecetteFr;
+
+                    if (descriptionCourte != "") {
+                        nomRecetteAffichage = nomRecetteFr + " (" + descriptionCourte + ")";
+                        variantCombo << descriptionCourte;
+                    } else {
+                        nomRecetteAffichage = nomRecetteFr;
+                        variantCombo << "";
+                    }
+                    //ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, nomRecetteFr);
+                    ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, QVariant(variantCombo));
+                    //qDebug() << variantCombo;
+                }
+            }
+
         }
     }else{
         QMessageBox::critical(this, "Listing Recettes", "Erreur récupération des recettes.\nDétails:\n"+query.lastError().text());
@@ -159,13 +173,15 @@ void MainWindow::listeRecettes()
 void MainWindow::recetteChoisis(int index){
     index += 0;
     QSqlQuery query(bdd.getBase());
-    QString recette = ui->qcbListeRecettes->currentData().toString();
+    //QString recette = ui->qcbListeRecettes->currentData().toString(); // <--- TODO : toList()
+    QList<QVariant> recette = ui->qcbListeRecettes->currentData().toList();
 
     ui->qcbListeRecettes->setToolTip("");
     ui->teRecetteDescription->clear();
     ui->imageRecette->clear();
 
-    if (recette == "NOTHING"){
+    //if (recette == "NOTHING"){ //TODO : <--- recette.at(0) == "NOTHING"
+    if (recette.at(0) == "NOTHING"){
         recetteSelectionne.clear();
         ui->pbRecherche->setEnabled(false);
     } else {
@@ -173,7 +189,7 @@ void MainWindow::recetteChoisis(int index){
         recetteSelectionne.append(recette);
         ui->pbRecherche->setText("Lister Ingrédients");
 
-        if(query.exec("SELECT DISTINCT recette_description, recette_icone FROM Recettes WHERE recette_nom_fr = \""+recette+"\"")){
+        if(query.exec("SELECT DISTINCT recette_description, recette_icone FROM Recettes WHERE recette_nom_fr = \""+recette.at(0).toString()+"\" AND recette_description_courte = \""+recette.at(1).toString()+"\"")){ //TODO : ajouter filtre description courte
             while(query.next()){
                 QString nomIcone = query.value("recette_icone").toString();
                 QString description = query.value("recette_description").toString();
@@ -185,15 +201,13 @@ void MainWindow::recetteChoisis(int index){
 
                 ui->teRecetteDescription->append(description);
                 ui->imageRecette->setPixmap(image.scaled(100, 100));
-                ui->qcbListeRecettes->setToolTip("<img src='"+param.getImagePath()+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette+"</strong> \
+                ui->qcbListeRecettes->setToolTip("<img src='"+param.getImagePath()+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette.at(0).toString()+"</strong> \
                                                 <br /><br />"+description);
             }
         }
         ui->pbRecherche->setEnabled(true);
 
-//        if (param.getRestoreRecipe()){
-            param.setLastRecipe(recette);
-//        }
+        param.setLastRecipe(recette); //TODO
     }
 
 }
@@ -211,7 +225,7 @@ void MainWindow::clickListerIngredients(){
         QVariant rootName = modele->data(rootIndex);
         itemExpanded.clear();
 
-        if (rootName.toString() == recetteSelectionne){
+        if (rootName.toString() == recetteSelectionne.at(0)){
             pourTout(modele);
         }
     }
@@ -225,13 +239,14 @@ void MainWindow::clickListerIngredients(){
 /*
  * On liste les ingrédients dans la vue avec la hiérarchie
  */
-void MainWindow::listerIngredients(QString recette){
+void MainWindow::listerIngredients(QList<QVariant> recette){
     /*
      * On définis les variables
      */
     modele->clear();
     bool donneesFarmTrouvee = false;
-    QStandardItem *rootNom = new QStandardItem(recette);
+    //QStandardItem *rootNom = new QStandardItem(recette); //TODO : <--- Remplacer par QStandardItem(recette.at(0))
+    QStandardItem *rootNom = new QStandardItem(recette.at(0).toString());
     QStandardItem *rootQuantite = new QStandardItem();
     QList<QStandardItem*> root;
     QStringList header;
@@ -239,7 +254,7 @@ void MainWindow::listerIngredients(QString recette){
     QSqlQuery query(bdd.getBase());
     QString sql = "", quantiteSql, nomIcone;
 
-    QVector<QString> recettes, recettesTemp, ressourcesNom, ressourcesIcone, ressourcesID;
+    QVector<QString> recettes, recettesTemp, ressourcesNom, ressourcesIcone, ressourcesID, descriptionCourte, descriptionCourteTemp;//TODO : +1 descCourte, desCourteTemp
     QVector<int> niveaux, niveauxTemp, ressourcesQuantite, precedenteQuantite, precedenteQuantiteTemp;
 
     int niveau = 1, i = 0, sizeToRemove = 0, quantiteRecette = ui->sbQuantite->value();
@@ -250,7 +265,7 @@ void MainWindow::listerIngredients(QString recette){
     /*
      * On va chercher le niveau MAX et l'icone de la recette
      */
-    query.exec("SELECT DISTINCT MAX(recette_niveau) recette_niveau, recette_icone FROM Recettes WHERE recette_nom_fr =  \""+recette+"\"");
+    query.exec("SELECT DISTINCT MAX(recette_niveau) recette_niveau, recette_icone FROM Recettes WHERE recette_nom_fr = \""+recette.at(0).toString()+"\" AND recette_description_courte = \""+recette.at(1).toString()+"\"");//TODO : <--- Remplacer par recette.at(0) / Ajouter filtre desc courte
     while(query.next()){
         niveau = query.value("recette_niveau").toInt();
         nomIcone = query.value("recette_icone").toString();
@@ -260,11 +275,12 @@ void MainWindow::listerIngredients(QString recette){
     /*
      * On doit aller chercher les niveaux de la recette.
      */
-    query.exec("SELECT DISTINCT recette_niveau FROM Recettes WHERE recette_nom_fr =  \""+recette+"\"");
+    query.exec("SELECT DISTINCT recette_niveau FROM Recettes WHERE recette_nom_fr =  \""+recette.at(0).toString()+"\" AND recette_description_courte = \""+recette.at(1).toString()+"\"");//TODO : <--- Remplacer par recette.at(0) / Ajouter filtre desc courte
     while(query.next()) {
-        recettes.push_back(recette);
+        recettes.push_back(recette.at(0).toString());
+        //TODO : push_back descCourte
+        descriptionCourte.push_back(recette.at(1).toString());
         niveaux.push_back(query.value("recette_niveau").toInt());
-        //precedenteQuantite.push_back(1);
         precedenteQuantite.push_back(quantiteRecette);
     }
 
@@ -294,11 +310,13 @@ void MainWindow::listerIngredients(QString recette){
             if (niveaux.at(i) > 1){
                 sql = "SELECT DISTINCT \
                             r1.recette_nom_fr \
+                          , r1.recette_description_courte \
                           , r1.recette_niveau \
                           , r1.recette_quantitee_obtenue \
                           , r1.recette_quantitee_composant \
                           , r1.recette_icone \
                           , r2.recette_nom_fr Composant \
+                          , r2.recette_description_courte DescCourteComposant \
                           , r2.recette_niveau Niveau_composant \
                           , r2.recette_icone NomIcone \
                       FROM \
@@ -306,14 +324,17 @@ void MainWindow::listerIngredients(QString recette){
                       LEFT JOIN Recettes r2 ON r2.id = r1.recette_composant_id \
                       WHERE \
                           r1.recette_nom_fr = \""+recettes.at(i)+"\" \
-                      AND r1.recette_niveau = \""+QString::number(niveaux.at(i))+"\"";
+                      AND r1.recette_niveau = \""+QString::number(niveaux.at(i))+"\" \
+                      AND r1.recette_description_courte = \""+descriptionCourte.at(i)+"\"";//TODO : Ajouter filtre description courte (descCourte + desc courte composant
             } else {
                 sql = "SELECT DISTINCT \
                       re.recette_nom_fr \
+                    , re.recette_description_courte \
                     , re.recette_niveau \
                     , re.recette_quantitee_obtenue \
                     , re.recette_quantitee_composant \
                     , rl.ressources_nom_fr Composant \
+                    , \"\" DescCourteComposant \
                     , \"0\" Niveau_composant \
                     , rl.ressources_icone NomIcone \
                     , rl.id ID_Ressources \
@@ -322,7 +343,8 @@ void MainWindow::listerIngredients(QString recette){
                 LEFT JOIN Ressources_Listes rl ON rl.id = re.recette_composant_id \
                 WHERE \
                     re.recette_nom_fr = \""+recettes.at(i)+"\" \
-                AND re.recette_niveau = \""+QString::number(niveaux.at(i))+"\"";
+                AND re.recette_niveau = \""+QString::number(niveaux.at(i))+"\" \
+                AND re.recette_description_courte = \""+descriptionCourte.at(i)+"\"";//TODO : Ajouter filtre description courte
             }
 
             /*
@@ -339,6 +361,8 @@ void MainWindow::listerIngredients(QString recette){
                 composantQuantite->setEditable(false);
                 QString nomComposant = query.value("Composant").toString();
                 QString iconeComposant = query.value("NomIcone").toString();
+                QString descriptionCourte = query.value("DescCourteComposant").toString();
+                //TODO : QString +1 descCourte
                 QString quantite;
                 int niveauComposant = query.value("Niveau_composant").toInt();
                 int quantiteObtenu = query.value("recette_quantitee_obtenue").toInt();
@@ -357,6 +381,8 @@ void MainWindow::listerIngredients(QString recette){
                 if (niveauComposant != 0) {
                     recettesTemp.push_back(nomComposant);
                     niveauxTemp.push_back(niveauComposant);
+                    descriptionCourteTemp.push_back(descriptionCourte);
+                    //TODO : descCourteTemp push_back
 
                     composantNom->setText(nomComposant);
                     composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
@@ -367,7 +393,7 @@ void MainWindow::listerIngredients(QString recette){
                  * Suivant le resultat de la requête pour la quantite obtenue, le calcul diffère
                  */
                 if (quantiteObtenu > 1){
-                    floatQuantite = static_cast<double>(quantiteRecette) / quantiteObtenu * static_cast<double>(quantiteNecessaire) * static_cast<double>(precedenteQuantiteTemp.at(i));
+                    floatQuantite = static_cast<double>(quantiteRecette) / quantiteObtenu * static_cast<double>(quantiteNecessaire) * static_cast<double>(precedenteQuantite.at(i));
                 } else {
                     floatQuantite = quantiteObtenu * quantiteNecessaire * precedenteQuantite.at(i);
                 }
@@ -421,6 +447,8 @@ void MainWindow::listerIngredients(QString recette){
         sizeToRemove = recettes.size();
         for (i = 0; i < sizeToRemove; i++){
             recettes.remove(0);
+            //TODO : remove descCourte
+            descriptionCourte.remove(0);
             niveaux.remove(0);
             precedenteQuantite.remove(0);
         }
@@ -428,6 +456,8 @@ void MainWindow::listerIngredients(QString recette){
         if (recettesTemp.size() != 0) {
             for (i = 0; i < recettesTemp.size(); i++) {
                 recettes.push_back(recettesTemp.at(i));
+                //TODO : descCourte push_back
+                descriptionCourte.push_back(descriptionCourteTemp.at(i));
                 niveaux.push_back(niveauxTemp.at(i));
                 precedenteQuantite.push_back(precedenteQuantiteTemp.at(i));
             }
@@ -435,6 +465,8 @@ void MainWindow::listerIngredients(QString recette){
             sizeToRemove = recettesTemp.size();
             for (i = 0; i < sizeToRemove; i++) {
                 recettesTemp.remove(0);
+                //TODO : remove descCourteTemp
+                descriptionCourteTemp.remove(0);
                 niveauxTemp.remove(0);
                 precedenteQuantiteTemp.remove(0);
             }
@@ -577,7 +609,7 @@ void MainWindow::listerIngredients(QString recette){
  */
 void MainWindow::modifierQuantite(int valeur){
     valeur += 0;
-    if (recetteSelectionne != "" && modele->hasChildren()){
+    if (recetteSelectionne.at(0).toString() != "" && modele->hasChildren()){
         ui->pbRecherche->setText("Actualiser");
     }
     param.setQteLastRecipe(ui->sbQuantite->value());
@@ -632,11 +664,11 @@ void MainWindow::setAutoExpandFromButton(int state){
     if (state == 0){
         //unchecked
         param.setAutoExpand(false);
-        ui->cbAutoExpand->setChecked(false);
+        ui->aAutoExpand->setChecked(false);
     } else if (state == 2) {
         //checked
         param.setAutoExpand(true);
-        ui->cbAutoExpand->setChecked(true);
+        ui->aAutoExpand->setChecked(true);
     }
 }
 
@@ -653,6 +685,16 @@ void MainWindow::setAutoExpandFromMenu(bool state){
  * Fonction qui parcours tout le modele de la vue pour trouver les objets agrandis
  */
 void MainWindow::pourTout(QAbstractItemModel* modele, QModelIndex parent){
+    QList<QStandardItem *> rootList;
+    QStandardItemModel dernier;
+    QModelIndex indexItem;
+
+    rootList = this->modele->findItems("Total Matières Premières :", Qt::MatchRecursive);
+    indexItem = dernier.indexFromItem(rootList[0]);
+    //qDebug() << "ModelIndex : " << indexItem;
+    //qDebug() << "rowCount   : " << modele->rowCount(parent);
+
+
     for(int r = 0; r < modele->rowCount(parent); ++r) {
         QModelIndex index = modele->index(r, 0, parent);
         QVariant name = modele->data(index);
@@ -668,8 +710,14 @@ void MainWindow::pourTout(QAbstractItemModel* modele, QModelIndex parent){
             if (ui->vue->isExpanded(index)){
                 itemExpanded << index.data(Qt::DisplayRole).toString();
             }
+            qDebug() << "Item  : " << index.data(Qt::DisplayRole).toString();
             pourTout(modele, index);
+        } else {
+            qDebug() << "Item  : " << index.data(Qt::DisplayRole).toString();
         }
+        //qDebug() << "Item  : " << index.data(Qt::DisplayRole).toString();
+        //qDebug() << "Child ? " << modele->hasChildren(index);
+        //qDebug() << "------------------------";
     }
 }
 

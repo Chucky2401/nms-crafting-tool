@@ -43,7 +43,8 @@ public:
     ~MainWindow();
     bool createConnection();
     void listeRecettes();
-    void listerIngredients(QString recette);
+//    void listerIngredients(QString recette);
+    void listerIngredients(QList<QVariant> recette);
     void pourTout(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
     bool getEtatFenAjouterRecette();
     void setEtatFenAjouterRecette(bool stated);
@@ -75,7 +76,8 @@ private:
 
     Ui::MainWindow *ui;
     QSqlDatabase db;
-    QString recetteSelectionne;
+    //QString recetteSelectionne; // <--- QList<QVariant>
+    QList<QVariant> recetteSelectionne;
     QStandardItemModel *modele;
     QGraphicsPixmapItem itemImageRecette;
     QGraphicsScene imageRecette;

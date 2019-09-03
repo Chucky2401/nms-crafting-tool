@@ -6,6 +6,7 @@
 #include <QCloseEvent>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QList>
 
 #include "database.h"
 #include "settings.h"
@@ -39,6 +40,9 @@ private:
 
     class database bdd;
     class settings param;
+
+    void listerComposants();
+    QList<QString> listeIdComposants(QString type, QString nom);
 };
 
 #endif // AJOUTERRECETTE_H

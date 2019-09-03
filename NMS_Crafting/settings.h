@@ -36,9 +36,9 @@ public:
     bool getIniRestoreRecipe();
     bool getRestoreRecipe();
 
-    void setLastRecipe(QString name);
-    QString getIniLastRecipe();
-    QString getLastRecipe();
+    void setLastRecipe(QList<QVariant> name);
+    QList<QVariant> getIniLastRecipe();
+    QList<QVariant> getLastRecipe();
 
     void setQteLastRecipe(int quantite);
     int getIniQteLastRecipe();
@@ -69,7 +69,8 @@ private:
     bool farming;
     bool autoExpand;
     bool restoreRecipe;
-    QString lastRecipe;
+    //QString lastRecipe;
+    QList<QVariant> lastRecipe;
     int quantiteLastRecipe;
     QByteArray geometrie;
     QByteArray etat;

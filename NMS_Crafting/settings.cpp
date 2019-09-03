@@ -115,17 +115,17 @@ bool settings::getRestoreRecipe(){
     return this->restoreRecipe;
 }
 
-void settings::setLastRecipe(QString name){
+void settings::setLastRecipe(QList<QVariant> name){
     this->lastRecipe = name;
     iniParam->setValue("utilisateur/LastRecipe", name);
 }
 
-QString settings::getLastRecipe(){
+QList<QVariant> settings::getLastRecipe(){
     return this->lastRecipe;
 }
 
-QString settings::getIniLastRecipe(){
-    return iniParam->value("utilisateur/LastRecipe", settingDefaultString).toString();
+QList<QVariant> settings::getIniLastRecipe(){
+    return iniParam->value("utilisateur/LastRecipe", settingDefaultString).toList();
 }
 
 void settings::setQteLastRecipe(int quantite){
