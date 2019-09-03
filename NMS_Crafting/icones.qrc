@@ -11,5 +11,7 @@
         <file>memorize_24.png</file>
         <file>Atlas.png</file>
         <file>size_24.png</file>
+        <file>recettes_24px.png</file>
+        <file>ressources_24px.png</file>
     </qresource>
 </RCC>

@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QList>
+#include <QMetaEnum>
 
 #include "database.h"
 #include "settings.h"
@@ -18,10 +19,18 @@ class ajouterRecette;
 class ajouterRecette : public QDialog
 {
     Q_OBJECT
+    Q_ENUMS(eTypeComposant)
+    Q_ENUMS(eCombo)
 
 public:
     explicit ajouterRecette(QWidget *parent = nullptr);
     ~ajouterRecette();
+    enum eTypeComposant {
+        RESSOURCE, RECETTE
+    };
+    enum eCombo {
+        COMPOSANT1, COMPOSANT2, COMPOSANT3
+    };
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -31,9 +40,17 @@ private slots:
     void titreEdited(QString titre);
     void sousTitreEdited(QString sousTitre);
 
+    void listerRessourcesComposant1(bool checked);
+    void listerRessourcesComposant2(bool checked);
+    void listerRessourcesComposant3(bool checked);
+    void listerRecettesComposant1(bool checked);
+    void listerRecettesComposant2(bool checked);
+    void listerRecettesComposant3(bool checked);
+
 private:
     Ui::ajouterRecette *ui;
     const QString connectionName = "ajoutRecette";
+    const QString defaultString = "NOTHING";
 
     QFileDialog *fileDialog;
     QString fileNameComplete;
@@ -41,8 +58,9 @@ private:
     class database bdd;
     class settings param;
 
-    void listerComposants();
-    QList<QString> listeIdComposants(QString type, QString nom);
+    void listerComposants(QString typeComposant, QString combo = "Composant1");
+    QList<QVariant> listeIdRecette(QString nomComposant, QString descriptionCourte);
 };
 
 #endif // AJOUTERRECETTE_H
+

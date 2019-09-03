@@ -71,6 +71,7 @@ private:
     bool fenAjouterRecetteOuverte;
     bool ouvertureEnCours;
     const QVariant settingDefaultString = "DNE";
+    const QString defaultString = "NOTHING";
     const QVariant settingDefaultInt = -1;
     const QString connectionName = "principal";
 
