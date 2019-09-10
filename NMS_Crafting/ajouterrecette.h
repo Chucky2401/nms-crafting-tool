@@ -39,13 +39,14 @@ private slots:
     void chooseImage();
     void titreEdited(QString titre);
     void sousTitreEdited(QString sousTitre);
-
+    void verifierTitreSousTitre();
     void listerRessourcesComposant1(bool checked);
     void listerRessourcesComposant2(bool checked);
     void listerRessourcesComposant3(bool checked);
     void listerRecettesComposant1(bool checked);
     void listerRecettesComposant2(bool checked);
     void listerRecettesComposant3(bool checked);
+    void cliqueSurValider();
 
 private:
     Ui::ajouterRecette *ui;

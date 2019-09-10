@@ -199,7 +199,7 @@ void MainWindow::recetteChoisis(int index){
                     description = "<em>Pas de description</em>";
                 }
 
-                ui->teRecetteDescription->append(description);
+                ui->teRecetteDescription->setText(description.replace("\\n", "<br>", Qt::CaseSensitive));
                 ui->imageRecette->setPixmap(image.scaled(100, 100));
                 ui->qcbListeRecettes->setToolTip("<img src='"+param.getImagePath()+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette.at(0).toString()+"</strong> \
                                                 <br /><br />"+description);

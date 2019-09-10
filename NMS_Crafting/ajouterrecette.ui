@@ -26,7 +26,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="icon">
@@ -37,80 +37,21 @@
        <string>Général</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <layout class="QHBoxLayout" name="hlTitre">
-         <item>
-          <widget class="QLabel" name="lTitre">
-           <property name="minimumSize">
-            <size>
-             <width>91</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Titre</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="leTitre">
-           <property name="maxLength">
-            <number>50</number>
-           </property>
-           <property name="placeholderText">
-            <string>Poussière de Ferrite</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lNbCaractereTitre">
-           <property name="text">
-            <string>0/50</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="1" column="0">
-        <layout class="QHBoxLayout" name="hlSousTitre">
-         <item>
-          <widget class="QLabel" name="lSousTitre">
-           <property name="minimumSize">
-            <size>
-             <width>91</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Sous-Titre</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="leSousTitre">
-           <property name="maxLength">
-            <number>50</number>
-           </property>
-           <property name="placeholderText">
-            <string>Avec Metal Rouillé</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="lNbCarSousTitre">
-           <property name="text">
-            <string>0/50</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
+       <item row="5" column="0">
         <layout class="QHBoxLayout" name="hlQteObtenu">
          <item>
           <widget class="QLabel" name="lQteObtenu">
+           <property name="minimumSize">
+            <size>
+             <width>95</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="text">
             <string>Quantitée obtenue</string>
+           </property>
+           <property name="buddy">
+            <cstring>sbQteObtenu</cstring>
            </property>
           </widget>
          </item>
@@ -142,31 +83,7 @@
          </item>
         </layout>
        </item>
-       <item row="3" column="0">
-        <layout class="QVBoxLayout" name="vlDescription">
-         <item>
-          <widget class="QLabel" name="lDescription">
-           <property name="text">
-            <string>Description</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTextEdit" name="teDescription">
-           <property name="acceptRichText">
-            <bool>false</bool>
-           </property>
-           <property name="placeholderText">
-            <string>Faire de la poussière de Ferrite avec du Metal Rouillé</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="4" column="0">
+       <item row="7" column="0">
         <layout class="QVBoxLayout" name="vlIconeGlobal">
          <item>
           <widget class="QLabel" name="label_7">
@@ -224,39 +141,122 @@
          </item>
         </layout>
        </item>
-       <item row="5" column="0">
-        <layout class="QHBoxLayout" name="hlBoutonGeneral">
+       <item row="6" column="0">
+        <layout class="QVBoxLayout" name="vlDescription">
          <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbValiderGeneral">
+          <widget class="QLabel" name="lDescription">
            <property name="text">
-            <string>Valider</string>
+            <string>Description</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+           <property name="buddy">
+            <cstring>teDescription</cstring>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
+          <widget class="QTextEdit" name="teDescription">
+           <property name="acceptRichText">
+            <bool>false</bool>
+           </property>
+           <property name="placeholderText">
+            <string>Faire de la poussière de Ferrite avec du Metal Rouillé</string>
            </property>
           </widget>
          </item>
+        </layout>
+       </item>
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
          <item>
-          <widget class="QPushButton" name="pbCancelGeneral">
+          <layout class="QHBoxLayout" name="hlTitre">
+           <item>
+            <widget class="QLabel" name="lTitre">
+             <property name="minimumSize">
+              <size>
+               <width>95</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Titre</string>
+             </property>
+             <property name="buddy">
+              <cstring>leTitre</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leTitre">
+             <property name="maxLength">
+              <number>50</number>
+             </property>
+             <property name="placeholderText">
+              <string>Poussière de Ferrite</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lNbCaractereTitre">
+             <property name="text">
+              <string>0/50</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="hlSousTitre">
+           <item>
+            <widget class="QLabel" name="lSousTitre">
+             <property name="minimumSize">
+              <size>
+               <width>95</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Description Courte</string>
+             </property>
+             <property name="buddy">
+              <cstring>leSousTitre</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leSousTitre">
+             <property name="maxLength">
+              <number>50</number>
+             </property>
+             <property name="placeholderText">
+              <string>Avec Metal Rouillé</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lNbCarSousTitre">
+             <property name="text">
+              <string>0/50</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="lRecetteExiste">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="text">
-            <string>Annuler</string>
+            <string>TextLabel</string>
            </property>
           </widget>
          </item>
@@ -354,12 +354,18 @@
              <property name="text">
               <string>Quantité</string>
              </property>
+             <property name="buddy">
+              <cstring>sbQteComposant3</cstring>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QSpinBox" name="sbQteComposant3">
              <property name="cursor">
               <cursorShape>ArrowCursor</cursorShape>
+             </property>
+             <property name="minimum">
+              <number>1</number>
              </property>
              <property name="maximum">
               <number>999</number>
@@ -458,12 +464,18 @@
              <property name="text">
               <string>Quantité</string>
              </property>
+             <property name="buddy">
+              <cstring>sbQteComposant1</cstring>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QSpinBox" name="sbQteComposant1">
              <property name="cursor">
               <cursorShape>ArrowCursor</cursorShape>
+             </property>
+             <property name="minimum">
+              <number>1</number>
              </property>
              <property name="maximum">
               <number>999</number>
@@ -598,12 +610,18 @@
              <property name="text">
               <string>Quantité</string>
              </property>
+             <property name="buddy">
+              <cstring>sbQteComposant2</cstring>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QSpinBox" name="sbQteComposant2">
              <property name="cursor">
               <cursorShape>ArrowCursor</cursorShape>
+             </property>
+             <property name="minimum">
+              <number>1</number>
              </property>
              <property name="maximum">
               <number>999</number>
@@ -697,26 +715,33 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>leTitre</tabstop>
+  <tabstop>leSousTitre</tabstop>
+  <tabstop>sbQteObtenu</tabstop>
+  <tabstop>teDescription</tabstop>
+  <tabstop>pbSelectImage</tabstop>
+  <tabstop>sbQteComposant1</tabstop>
+  <tabstop>rbComposant1Ressources</tabstop>
+  <tabstop>rbComposant1Recettes</tabstop>
+  <tabstop>cbComposant1</tabstop>
+  <tabstop>sbQteComposant2</tabstop>
+  <tabstop>rbComposant2Ressources</tabstop>
+  <tabstop>rbComposant2Recettes</tabstop>
+  <tabstop>cbComposant2</tabstop>
+  <tabstop>sbQteComposant3</tabstop>
+  <tabstop>rbComposant3Ressources</tabstop>
+  <tabstop>rbComposant3Recettes</tabstop>
+  <tabstop>cbComposant3</tabstop>
+  <tabstop>pbValiderComposant</tabstop>
+  <tabstop>pbCancelComposant</tabstop>
+  <tabstop>leFilePath</tabstop>
+ </tabstops>
  <resources>
   <include location="icones.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>pbCancelGeneral</sender>
-   <signal>clicked()</signal>
-   <receiver>ajouterRecette</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>408</x>
-     <y>474</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>261</x>
-     <y>243</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>pbCancelComposant</sender>
    <signal>clicked()</signal>
@@ -724,12 +749,12 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>408</x>
-     <y>474</y>
+     <x>358</x>
+     <y>466</y>
     </hint>
     <hint type="destinationlabel">
-     <x>424</x>
-     <y>371</y>
+     <x>427</x>
+     <y>406</y>
     </hint>
    </hints>
   </connection>

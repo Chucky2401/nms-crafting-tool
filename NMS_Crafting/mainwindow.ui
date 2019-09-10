@@ -180,38 +180,25 @@
         <property name="topMargin">
          <number>0</number>
         </property>
-        <item row="1" column="1">
-         <widget class="QTextEdit" name="teRecetteDescription">
-          <property name="maximumSize">
+        <item row="1" column="0">
+         <widget class="QLabel" name="imageRecette">
+          <property name="minimumSize">
            <size>
-            <width>16777215</width>
+            <width>100</width>
             <height>100</height>
            </size>
           </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="lDescription">
           <property name="maximumSize">
            <size>
-            <width>16777215</width>
-            <height>15</height>
+            <width>100</width>
+            <height>100</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
           </property>
           <property name="text">
-           <string>Description</string>
-          </property>
-          <property name="buddy">
-           <cstring>teRecetteDescription</cstring>
+           <string/>
           </property>
          </widget>
         </item>
@@ -234,25 +221,38 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="imageRecette">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>100</height>
-           </size>
-          </property>
+        <item row="0" column="1">
+         <widget class="QLabel" name="lDescription">
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>16777215</width>
+            <height>15</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Description</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QTextEdit" name="teRecetteDescription">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
             <height>100</height>
            </size>
           </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
+          <property name="autoFillBackground">
+           <bool>true</bool>
           </property>
-          <property name="text">
-           <string/>
+          <property name="readOnly">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -469,7 +469,6 @@
   <tabstop>pbRecherche</tabstop>
   <tabstop>pbExpand</tabstop>
   <tabstop>pbCollapse</tabstop>
-  <tabstop>teRecetteDescription</tabstop>
   <tabstop>vue</tabstop>
  </tabstops>
  <resources>

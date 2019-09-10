@@ -13,9 +13,23 @@ ajouterRecette::ajouterRecette(QWidget *parent) :
         QMessageBox::critical(this, "Connexion à la BDD", "Echec de la connexion à la Base de Données.\nDétails:\n"+bdd.getError());
     }
 
+    ui->lRecetteExiste->setVisible(false);
+    ui->pbValiderComposant->setEnabled(false);
+
+    ui->cbComposant1->addItem(" Choisir le type                                                                 ↑↑↑", defaultString);
+    ui->cbComposant2->addItem(" Choisir le type                                                                 ↑↑↑", defaultString);
+    ui->cbComposant3->addItem(" Choisir le type                                                                 ↑↑↑", defaultString);
+    ui->cbComposant1->setEditable(false);
+    ui->cbComposant2->setEditable(false);
+    ui->cbComposant3->setEditable(false);
+
     connect(ui->pbSelectImage, SIGNAL(clicked()), this, SLOT(chooseImage()));
     connect(ui->leTitre, SIGNAL(textEdited(QString)), this, SLOT(titreEdited(QString)));
     connect(ui->leSousTitre, SIGNAL(textEdited(QString)), this, SLOT(sousTitreEdited(QString)));
+    connect(ui->leTitre, SIGNAL(editingFinished()), this, SLOT(verifierTitreSousTitre()));
+    connect(ui->leSousTitre, SIGNAL(editingFinished()), this, SLOT(verifierTitreSousTitre()));
+    connect(ui->pbValiderComposant, SIGNAL(clicked()), this, SLOT(cliqueSurValider()));
+
     connect(ui->rbComposant1Ressources, SIGNAL(toggled(bool)), this, SLOT(listerRessourcesComposant1(bool)));
     connect(ui->rbComposant1Recettes, SIGNAL(toggled(bool)), this, SLOT(listerRecettesComposant1(bool)));
     connect(ui->rbComposant2Ressources, SIGNAL(toggled(bool)), this, SLOT(listerRessourcesComposant2(bool)));
@@ -34,14 +48,27 @@ ajouterRecette::~ajouterRecette()
 }
 
 void ajouterRecette::closeEvent(QCloseEvent *event){
-//    if (QMessageBox::question(this, "Fermeture", "Voulez-vous fermer le programme ?") == QMessageBox::Yes){
+    QString titre = ui->leTitre->text();
+    QString descriptionCourte = ui->leSousTitre->text();
+    QString composant1 = ui->cbComposant1->currentData().toString();
+    QString composant2 = ui->cbComposant2->currentData().toString();
+    QString composant3 = ui->cbComposant3->currentData().toString();
+
+    if (titre != "" || descriptionCourte != "" || composant1 != defaultString || composant2 != defaultString || composant3 != defaultString){
+        if (QMessageBox::warning(this, "Annuler l'ajout", "Voulez-vous fermer la fenêtre ?\nAttention ! Toutes vos modifications seront perdues !", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes){
+            if (bdd.isOpen(connectionName))
+                bdd.closeConnection(connectionName);
+            emit finished(0);
+            event->accept();
+        } else {
+            event->ignore();
+        }
+    } else {
         if (bdd.isOpen(connectionName))
             bdd.closeConnection(connectionName);
         emit finished(0);
         event->accept();
-//    } else {
-//        event->ignore();
-//    }
+    }
 }
 
 void ajouterRecette::titreEdited(QString titre){
@@ -76,6 +103,46 @@ void ajouterRecette::sousTitreEdited(QString sousTitre){
     }
 }
 
+void ajouterRecette::verifierTitreSousTitre(){
+    QString titre = ui->leTitre->text();
+    QString sousTitre = ui->leSousTitre->text();
+    QString sql;
+    QSqlQuery query(bdd.getBase());
+    int nbrRecetteEnBase = 0;
+
+    if (!titre.isEmpty()){
+
+        sql = "SELECT \
+                COUNT(1) AS NbrRecette \
+                FROM \
+                Recettes \
+                WHERE \
+                recette_nom_fr = ? \
+                    AND recette_description_courte = ?";
+
+                                                      query.prepare(sql);
+        query.bindValue(0, titre);
+        query.bindValue(1, sousTitre);
+        if (query.exec()){
+            while(query.next()){
+                nbrRecetteEnBase = query.value("NbrRecette").toInt();
+            }
+            if(nbrRecetteEnBase > 0){
+                ui->lRecetteExiste->setText("La recette existe déjà. Modifié le titre ou le sous-titre.");
+                ui->lRecetteExiste->setStyleSheet("QLabel {color: red;}");
+                ui->lRecetteExiste->setVisible(true);
+                ui->pbValiderComposant->setEnabled(false);
+            } else {
+                ui->lRecetteExiste->setVisible(false);
+                ui->pbValiderComposant->setEnabled(true);
+            }
+        }
+    } else {
+        ui->pbValiderComposant->setEnabled(false);
+    }
+
+}
+
 void ajouterRecette::chooseImage(){
 //    qDebug() << QDir::currentPath();
     fileDialog = new QFileDialog(this, "Choisir une image", param.getImagePath(), tr("Fichier PNG (*.png)"));
@@ -108,13 +175,27 @@ void ajouterRecette::listerComposants(QString typeComposant, QString combo){
     QString sql, sql2;
     QSqlQuery query(bdd.getBase()), query2(bdd.getBase());
 
+    switch (meComposant.keyToValue(valeurCombo.toLatin1())) {
+    case COMPOSANT1:
+        ui->cbComposant1->setEditable(true);
+        break;
+    case COMPOSANT2:
+        ui->cbComposant2->setEditable(true);
+        break;
+    case COMPOSANT3:
+        ui->cbComposant3->setEditable(true);
+        break;
+    }
+
+
     switch (meType.keyToValue(valeurComposant.toLatin1())) {
         case RESSOURCE:{
             //TODO
-            typeEtId << "RESSOURCE";
             sql = "SELECT id, ressources_nom_fr, ressources_icone FROM Ressources_Listes";
             if (query.exec(sql)){
                 while(query.next()){
+                    typeEtId.clear();
+                    typeEtId << "RESSOURCE";
                     QString nomRessource = query.value("ressources_nom_fr").toString();
                     int idRessource = query.value("id").toInt();
                     typeEtId << idRessource;
@@ -139,7 +220,6 @@ void ajouterRecette::listerComposants(QString typeComposant, QString combo){
             //TODO
             int recetteNiveau = 0;
 
-            typeEtId << "RECETTE";
             sql = "SELECT DISTINCT recette_nom_fr, recette_niveau, recette_icone FROM Recettes GROUP BY recette_nom_fr ORDER BY recette_niveau, recette_nom_fr";
             if (query.exec(sql)){
                 while(query.next()){
@@ -166,6 +246,8 @@ void ajouterRecette::listerComposants(QString typeComposant, QString combo){
                     sql2 = "SELECT DISTINCT recette_description_courte FROM Recettes WHERE recette_nom_fr = \""+nomRecetteFr+"\" ORDER BY recette_description_courte ASC";
                     if(query2.exec(sql2)){
                         while(query2.next()){
+                            typeEtId.clear();
+                            typeEtId << "RECETTE";
                             QString descriptionCourte = query2.value("recette_description_courte").toString();
 
                             if (descriptionCourte != "") {
@@ -210,7 +292,9 @@ QList<QVariant> ajouterRecette::listeIdRecette(QString nomComposant, QString des
             Recettes \
         WHERE \
             recette_nom_fr = \""+nomComposant+"\" \
-        AND recette_description_courte = \""+descriptionCourte+"\"";
+        AND recette_description_courte = \""+descriptionCourte+"\" \
+        ORDER BY \
+            id ASC";
 
     if (query.exec(sql)){
         while(query.next()){
@@ -250,6 +334,7 @@ void ajouterRecette::listerRecettesComposant2(bool checked){
     if(checked){
         ui->cbComposant2->clear();
         ui->cbComposant2->addItem("***  Choisir Recettes  ***", defaultString);
+        listerComposants("Recette", "Composant2");
     }
 }
 
@@ -265,5 +350,234 @@ void ajouterRecette::listerRecettesComposant3(bool checked){
     if(checked){
         ui->cbComposant3->clear();
         ui->cbComposant3->addItem("***  Choisir Recettes  ***", defaultString);
+        listerComposants("Recette", "Composant3");
     }
+}
+
+void ajouterRecette::cliqueSurValider(){
+    const QString sqlRecette = "SELECT recette_niveau FROM Recettes WHERE id IN (:ids) ORDER BY id ASC";
+    const QString sqlRecetteInsert = "INSERT INTO Recettes_Test_INSERT \
+    (recette_nom_fr, recette_description_courte, recette_description, recette_niveau, recette_composant_id, recette_quantitee_composant, \
+    recette_quantitee_obtenue, recette_icone) \
+    VALUES(:nom, :descriptionCourte, :description, :niveau, :idComposant, :qteComposant, :qteObtenu, :icone)";
+
+    QString titre = ui->leTitre->text();
+    QString descriptionCourte = ui->leSousTitre->text();
+    QString description = ui->teDescription->toPlainText();
+    QString cheminImage = ui->leFilePath->text();
+    int quantiteObtenue = ui->sbQteObtenu->value();
+    QList<QVariant> composant1 = ui->cbComposant1->currentData().toList();
+    QList<QVariant> composant2 = ui->cbComposant2->currentData().toList();
+    QList<QVariant> composant3 = ui->cbComposant3->currentData().toList();
+    int quantiteComposant1 = ui->sbQteComposant1->value();
+    int quantiteComposant2 = ui->sbQteComposant2->value();
+    int quantiteComposant3 = ui->sbQteComposant3->value();
+
+    QList<int> intIdsComposant1, intIdsComposant2, intIdsComposant3;
+    QList<int> intNiveauxComposant1, intNiveauxComposant2, intNiveauxComposant3;
+    QString typeComposant1, typeComposant2, typeComposant3;
+    QString sqlIdsComposant1 = "", sqlIdsComposant2 = "", sqlIdsComposant3 = "";
+    QString sqlComposant1, sqlComposant2, sqlComposant3;
+    QSqlQuery queryComposant1(bdd.getBase()), queryComposant2(bdd.getBase()), queryComposant3(bdd.getBase());
+
+    QString tempSql, sqlInsertRecette;
+    QList<QString> sqlInsertsRecette;
+    QSqlQuery queryInsertRecette(bdd.getBase());
+
+    //qDebug() << "=============================================";
+    //qDebug() << "Titre                : " << titre;
+    //qDebug() << "Description courte   : " << descriptionCourte;
+    //qDebug() << "Description          : " << description;
+    //qDebug() << "Chemin image         : " << cheminImage;
+    //qDebug() << "Quanite Obtenue      : " << quantiteObtenue;
+    //qDebug() << "Composant 1          : " << composant1;
+    //qDebug() << "    Quantitee        : " << quantiteComposant1;
+    //qDebug() << "Composant 2          : " << composant2;
+    //qDebug() << "    Quantitee        : " << quantiteComposant2;
+    //qDebug() << "Composant 3          : " << composant3;
+    //qDebug() << "    Quantitee        : " << quantiteComposant3;
+    qDebug() << "-----";
+
+    if(composant1.count() > 1){
+        typeComposant1 = composant1.at(0).toString();
+        composant1.removeFirst();
+        for (int i = 0; i < composant1.size(); ++i) {
+            int identifiant = composant1.at(i).toInt();
+            if (i != composant1.size()-1){
+                sqlIdsComposant1 += QString::number(identifiant) + ", ";
+            } else {
+                sqlIdsComposant1 += QString::number(identifiant);
+            }
+            intIdsComposant1 << identifiant;
+            if(typeComposant1 == "RESSOURCE"){
+                intNiveauxComposant1 << 1;
+            }
+        }
+
+        if(typeComposant1 == "RECETTE"){
+            sqlComposant1 = sqlRecette;
+            sqlComposant1.replace(":ids", sqlIdsComposant1);
+            queryComposant1.prepare(sqlComposant1);
+            if(queryComposant1.exec()){
+                while(queryComposant1.next()){
+                    int niveau = queryComposant1.value("recette_niveau").toInt();
+                    intNiveauxComposant1 << niveau+1;
+                }
+            } else {
+                QMessageBox::critical(this, "Error", queryComposant1.lastError().text());
+            }
+        }
+
+        //qDebug() << "sqlRecette           : " << sqlRecette;
+        //qDebug() << "sqlComposant1        : " << sqlComposant1;
+        //qDebug() << "sqlIdsComposant1     : " << sqlIdsComposant1;
+        //qDebug() << "intIdsComposant1     : " << intIdsComposant1;
+        //qDebug() << "intNiveauxComposant1 : " << intNiveauxComposant1;
+        //qDebug() << "-----";
+
+        if ((intIdsComposant1.size() != 0 && intNiveauxComposant1.size() != 0) && intIdsComposant1.size() == intNiveauxComposant1.size()){
+            for (int i = 0; i < intIdsComposant1.size(); i++){
+                tempSql.clear();
+                tempSql = sqlRecetteInsert;
+                tempSql.replace(":nom", "'"+titre+"'");
+                tempSql.replace(":descriptionCourte", "'"+descriptionCourte+"'");
+                tempSql.replace(":description", "'"+description+"'");
+                tempSql.replace(":niveau", QString::number(intNiveauxComposant1.at(i)));
+                tempSql.replace(":idComposant", QString::number(intIdsComposant1.at(i)));
+                tempSql.replace(":qteComposant", QString::number(quantiteComposant1));
+                tempSql.replace(":qteObtenu", QString::number(quantiteObtenue));
+                tempSql.replace(":icone", "'"+cheminImage.replace("./img/", "")+"'");
+
+                sqlInsertsRecette << tempSql;
+            }
+        }
+    }
+
+    if(composant2.count() > 1){
+        typeComposant2 = composant2.at(0).toString();
+        composant2.removeFirst();
+        for (int i = 0; i < composant2.size(); ++i) {
+            int identifiant = composant2.at(i).toInt();
+            if (i != composant2.size()-1){
+                sqlIdsComposant2 += QString::number(identifiant) + ", ";
+            } else {
+                sqlIdsComposant2 += QString::number(identifiant);
+            }
+            intIdsComposant2 << identifiant;
+            if(typeComposant2 == "RESSOURCE"){
+                intNiveauxComposant2 << 1;
+            }
+        }
+
+        if(typeComposant2 == "RECETTE"){
+            sqlComposant2 = sqlRecette;
+            sqlComposant2.replace(":ids", sqlIdsComposant2);
+            queryComposant2.prepare(sqlComposant2);
+            if(queryComposant2.exec()){
+                while(queryComposant2.next()){
+                    int niveau = queryComposant2.value("recette_niveau").toInt();
+                    intNiveauxComposant2 << niveau+1;
+                }
+            } else {
+                QMessageBox::critical(this, "Error", queryComposant2.lastError().text());
+            }
+        }
+
+        //qDebug() << "sqlRecette           : " << sqlRecette;
+        //qDebug() << "sqlComposant2        : " << sqlComposant2;
+        //qDebug() << "sqlIdsComposant2     : " << sqlIdsComposant2;
+        //qDebug() << "intIdsComposant2     : " << intIdsComposant2;
+        //qDebug() << "intNiveauxComposant2 : " << intNiveauxComposant2;
+        //qDebug() << "-----";
+
+        if ((intIdsComposant2.size() != 0 && intNiveauxComposant2.size() != 0) && intIdsComposant2.size() == intNiveauxComposant2.size()){
+            for (int i = 0; i < intIdsComposant2.size(); i++){
+                tempSql.clear();
+                tempSql = sqlRecetteInsert;
+                tempSql.replace(":nom", "'"+titre+"'");
+                tempSql.replace(":descriptionCourte", "'"+descriptionCourte+"'");
+                tempSql.replace(":description", "'"+description+"'");
+                tempSql.replace(":niveau", QString::number(intNiveauxComposant2.at(i)));
+                tempSql.replace(":idComposant", QString::number(intIdsComposant2.at(i)));
+                tempSql.replace(":qteComposant", QString::number(quantiteComposant2));
+                tempSql.replace(":qteObtenu", QString::number(quantiteObtenue));
+                tempSql.replace(":icone", "'"+cheminImage.replace("./img/", "")+"'");
+
+                sqlInsertsRecette << tempSql;
+            }
+        }
+    }
+
+    if(composant3.count() > 1){
+        typeComposant3 = composant3.at(0).toString();
+        composant3.removeFirst();
+        for (int i = 0; i < composant3.size(); ++i) {
+            int identifiant = composant3.at(i).toInt();
+            if (i != composant3.size()-1){
+                sqlIdsComposant3 += QString::number(identifiant) + ", ";
+            } else {
+                sqlIdsComposant3 += QString::number(identifiant);
+            }
+            intIdsComposant3 << identifiant;
+            if(typeComposant3 == "RESSOURCE"){
+                intNiveauxComposant3 << 1;
+            }
+        }
+
+        if(typeComposant3 == "RECETTE"){
+            sqlComposant3 = sqlRecette;
+            sqlComposant3.replace(":ids", sqlIdsComposant3);
+            queryComposant3.prepare(sqlComposant3);
+            if(queryComposant3.exec()){
+                while(queryComposant3.next()){
+                    int niveau = queryComposant3.value("recette_niveau").toInt();
+                    intNiveauxComposant3 << niveau+1;
+                }
+            } else {
+                QMessageBox::critical(this, "Error", queryComposant3.lastError().text());
+            }
+        }
+
+        //qDebug() << "sqlRecette           : " << sqlRecette;
+        //qDebug() << "sqlComposant3        : " << sqlComposant3;
+        //qDebug() << "sqlIdsComposant3     : " << sqlIdsComposant3;
+        //qDebug() << "intIdsComposant3     : " << intIdsComposant3;
+        //qDebug() << "intNiveauxComposant3 : " << intNiveauxComposant3;
+        //qDebug() << "-----";
+
+        if ((intIdsComposant3.size() != 0 && intNiveauxComposant3.size() != 0) && intIdsComposant3.size() == intNiveauxComposant3.size()){
+            for (int i = 0; i < intIdsComposant3.size(); i++){
+                tempSql.clear();
+                tempSql = sqlRecetteInsert;
+                tempSql.replace(":nom", "'"+titre+"'");
+                tempSql.replace(":descriptionCourte", "'"+descriptionCourte+"'");
+                tempSql.replace(":description", "'"+description+"'");
+                tempSql.replace(":niveau", QString::number(intNiveauxComposant3.at(i)));
+                tempSql.replace(":idComposant", QString::number(intIdsComposant3.at(i)));
+                tempSql.replace(":qteComposant", QString::number(quantiteComposant3));
+                tempSql.replace(":qteObtenu", QString::number(quantiteObtenue));
+                tempSql.replace(":icone", "'"+cheminImage.replace("./img/", "")+"'");
+
+                sqlInsertsRecette << tempSql;
+            }
+        }
+    }
+
+    qDebug() << "sqlInsertsRecette     : " << sqlInsertsRecette;
+    qDebug() << "-----";
+
+    if (sqlInsertsRecette.size() != 0){
+        for (int i = 0; i < sqlInsertsRecette.size(); i++){
+            sqlInsertRecette.clear();
+            sqlInsertRecette = sqlInsertsRecette.at(i);
+            if(queryInsertRecette.exec(sqlInsertRecette)){
+                qDebug() << "Insert " << i << "              : Réussie !";
+            } else {
+                qDebug() << "Insert " << i << "              : Echoue !!";
+                qDebug() << "Erreur                : " << queryInsertRecette.lastError().text();
+            }
+        }
+    }
+    // TODO : Transaction
+    this->close();
 }
