@@ -54,7 +54,7 @@ void ajouterRecette::closeEvent(QCloseEvent *event){
     QString composant2 = ui->cbComposant2->currentData().toString();
     QString composant3 = ui->cbComposant3->currentData().toString();
 
-    if (titre != "" || descriptionCourte != "" || composant1 != defaultString || composant2 != defaultString || composant3 != defaultString){
+    if ((titre != "" || descriptionCourte != "" || composant1 != defaultString || composant2 != defaultString || composant3 != defaultString) && !sauvegardeReussi){
         if (QMessageBox::warning(this, "Annuler l'ajout", "Voulez-vous fermer la fenêtre ?\nAttention ! Toutes vos modifications seront perdues !", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes){
             if (bdd.isOpen(connectionName))
                 bdd.closeConnection(connectionName);
@@ -356,7 +356,11 @@ void ajouterRecette::listerRecettesComposant3(bool checked){
 
 void ajouterRecette::cliqueSurValider(){
     const QString sqlRecette = "SELECT recette_niveau FROM Recettes WHERE id IN (:ids) ORDER BY id ASC";
-    const QString sqlRecetteInsert = "INSERT INTO Recettes_Test_INSERT \
+    /*const QString sqlRecetteInsert = "INSERT INTO Recettes_Test_INSERT \
+    (recette_nom_fr, recette_description_courte, recette_description, recette_niveau, recette_composant_id, recette_quantitee_composant, \
+    recette_quantitee_obtenue, recette_icone) \
+    VALUES(:nom, :descriptionCourte, :description, :niveau, :idComposant, :qteComposant, :qteObtenu, :icone)";*/
+    const QString sqlRecetteInsert = "INSERT INTO Recettes \
     (recette_nom_fr, recette_description_courte, recette_description, recette_niveau, recette_composant_id, recette_quantitee_composant, \
     recette_quantitee_obtenue, recette_icone) \
     VALUES(:nom, :descriptionCourte, :description, :niveau, :idComposant, :qteComposant, :qteObtenu, :icone)";
@@ -373,6 +377,9 @@ void ajouterRecette::cliqueSurValider(){
     int quantiteComposant2 = ui->sbQteComposant2->value();
     int quantiteComposant3 = ui->sbQteComposant3->value();
 
+    bdd.startTransaction();
+    bool erreurInsert = false, composantDefinis = false;
+
     QList<int> intIdsComposant1, intIdsComposant2, intIdsComposant3;
     QList<int> intNiveauxComposant1, intNiveauxComposant2, intNiveauxComposant3;
     QString typeComposant1, typeComposant2, typeComposant3;
@@ -380,9 +387,13 @@ void ajouterRecette::cliqueSurValider(){
     QString sqlComposant1, sqlComposant2, sqlComposant3;
     QSqlQuery queryComposant1(bdd.getBase()), queryComposant2(bdd.getBase()), queryComposant3(bdd.getBase());
 
-    QString tempSql, sqlInsertRecette;
+    QString tempSql, sqlInsertRecette, derniereErreur;
     QList<QString> sqlInsertsRecette;
     QSqlQuery queryInsertRecette(bdd.getBase());
+
+    titre.replace("'", "''");
+    descriptionCourte.replace("'", "''");
+    description.replace("'", "''");
 
     //qDebug() << "=============================================";
     //qDebug() << "Titre                : " << titre;
@@ -399,6 +410,7 @@ void ajouterRecette::cliqueSurValider(){
     qDebug() << "-----";
 
     if(composant1.count() > 1){
+        composantDefinis = true;
         typeComposant1 = composant1.at(0).toString();
         composant1.removeFirst();
         for (int i = 0; i < composant1.size(); ++i) {
@@ -454,6 +466,7 @@ void ajouterRecette::cliqueSurValider(){
     }
 
     if(composant2.count() > 1){
+        composantDefinis = true;
         typeComposant2 = composant2.at(0).toString();
         composant2.removeFirst();
         for (int i = 0; i < composant2.size(); ++i) {
@@ -509,6 +522,7 @@ void ajouterRecette::cliqueSurValider(){
     }
 
     if(composant3.count() > 1){
+        composantDefinis = true;
         typeComposant3 = composant3.at(0).toString();
         composant3.removeFirst();
         for (int i = 0; i < composant3.size(); ++i) {
@@ -550,6 +564,7 @@ void ajouterRecette::cliqueSurValider(){
                 tempSql.clear();
                 tempSql = sqlRecetteInsert;
                 tempSql.replace(":nom", "'"+titre+"'");
+                //tempSql.replace(":nom", titre);
                 tempSql.replace(":descriptionCourte", "'"+descriptionCourte+"'");
                 tempSql.replace(":description", "'"+description+"'");
                 tempSql.replace(":niveau", QString::number(intNiveauxComposant3.at(i)));
@@ -566,18 +581,37 @@ void ajouterRecette::cliqueSurValider(){
     qDebug() << "sqlInsertsRecette     : " << sqlInsertsRecette;
     qDebug() << "-----";
 
-    if (sqlInsertsRecette.size() != 0){
+    if (sqlInsertsRecette.size() != 0 && composantDefinis){
         for (int i = 0; i < sqlInsertsRecette.size(); i++){
-            sqlInsertRecette.clear();
-            sqlInsertRecette = sqlInsertsRecette.at(i);
-            if(queryInsertRecette.exec(sqlInsertRecette)){
-                qDebug() << "Insert " << i << "              : Réussie !";
-            } else {
-                qDebug() << "Insert " << i << "              : Echoue !!";
-                qDebug() << "Erreur                : " << queryInsertRecette.lastError().text();
+            if(!erreurInsert){
+                sqlInsertRecette.clear();
+                sqlInsertRecette = sqlInsertsRecette.at(i);
+
+                if(queryInsertRecette.exec(sqlInsertRecette)){
+                    qDebug() << "Insert " << i << "              : Réussie !";
+                } else {
+                    qDebug() << "Insert " << i << "              : Echoue !!";
+                    qDebug() << "Erreur                : " << queryInsertRecette.lastError().text();
+                    derniereErreur = queryInsertRecette.lastError().text();
+                    erreurInsert = true;
+                }
             }
         }
     }
-    // TODO : Transaction
-    this->close();
+
+    if(erreurInsert){
+        bdd.stopTransaction(true);
+        QMessageBox::critical(this, "Erreur", "Une erreur est survenu lors de la création de la recette.\nErreur : " + derniereErreur);
+    } else if(!composantDefinis) {
+        bdd.stopTransaction(true);
+        QMessageBox::critical(this, "Aucun composant", "Vous n'avez définis aucun composant pour la recette !");
+    } else if(sqlInsertsRecette.size() == 0) {
+        bdd.stopTransaction(true);
+        QMessageBox::critical(this, "Erreur", "Une erreur est survenu lors de la sauvegarde de la nouvelle recette.\nErreur : Génération list inserts.");
+    } else {
+        bdd.stopTransaction(false);
+        sauvegardeReussi = true;
+        QMessageBox::information(this, "Recette ajouté", "La recette a été ajoutée !");
+        this->close();
+    }
 }

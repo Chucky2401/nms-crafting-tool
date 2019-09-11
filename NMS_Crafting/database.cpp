@@ -23,6 +23,9 @@ bool database::createConnection(QString name)
             setError(this->base.lastError().text());
             return false;
         }
+        //QSqlDriver *driver = this->base.driver();
+        //qDebug() << driver->hasFeature(QSqlDriver::Transactions);
+        //QSqlDriver::hasFeature(QSqlDriver::Transactions);
         return true;
     } else {
         setError("La base n'existe pas !");
@@ -62,6 +65,16 @@ void database::setError(QString error){
     this->lastBddError = error;
 }
 
-QVariant database::requete(QString sql){
-    this->query.exec(sql);
+void database::startTransaction(){
+    this->base.transaction();
+}
+
+void database::stopTransaction(bool error){
+    if (error){
+        bool retour = this->base.rollback();
+        qDebug() << "Rollback / " << retour;
+    } else {
+        bool retour = this->base.commit();
+        qDebug() << "Commit   / " << retour;
+    }
 }

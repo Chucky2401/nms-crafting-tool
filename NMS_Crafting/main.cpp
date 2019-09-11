@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     splash.show();
     a.processEvents();
 
-    QTime dieTime= QTime::currentTime().addSecs(5);
+    QTime dieTime= QTime::currentTime().addSecs(3);
         while (QTime::currentTime() < dieTime)
             QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 

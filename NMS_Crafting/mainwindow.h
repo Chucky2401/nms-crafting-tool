@@ -41,13 +41,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    bool createConnection();
-    void listeRecettes();
-//    void listerIngredients(QString recette);
-    void listerIngredients(QList<QVariant> recette);
-    void pourTout(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
-    bool getEtatFenAjouterRecette();
-    void setEtatFenAjouterRecette(bool stated);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -84,6 +77,14 @@ private:
     QGraphicsScene imageRecette;
     bool viewWasExtended;
     QStringList itemExpanded;
+
+    bool createConnection();
+    void listeRecettes();
+    void listerIngredients(QList<QVariant> recette);
+    void parcourirToutLeModele(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
+    bool getEtatFenAjouterRecette();
+    void setEtatFenAjouterRecette(bool stated);
+    void restaurerDerniereRecette();
 
     class settings param;
     class database bdd;

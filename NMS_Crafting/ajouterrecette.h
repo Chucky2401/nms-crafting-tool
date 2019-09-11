@@ -52,6 +52,7 @@ private:
     Ui::ajouterRecette *ui;
     const QString connectionName = "ajoutRecette";
     const QString defaultString = "NOTHING";
+    bool sauvegardeReussi = false;
 
     QFileDialog *fileDialog;
     QString fileNameComplete;

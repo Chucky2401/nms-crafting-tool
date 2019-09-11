@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QTime>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -49,16 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     /*
      * Restaure la dernière recette si voulu par l'utilisateur et que la recette est défins dans le .ini
      */
-    if (param.getRestoreRecipe() && param.getLastRecipe().at(0).toString() != "DNE"){
-//        qDebug() << param.getLastRecipe();
-        int index = ui->qcbListeRecettes->findData(param.getLastRecipe());
-//        qDebug() << index;
-        if (index != -1) {
-            ui->qcbListeRecettes->setCurrentIndex(index);
-            ui->sbQuantite->setValue(param.getQteLastRecipe());
-            emit ui->pbRecherche->clicked();
-        }
-    }
+    restaurerDerniereRecette();
 
     if (param.getRestoreSizePos()) {
         if(param.getEtat() != "DNE" && param.getGeometrie() != "DNE") {
@@ -180,7 +173,6 @@ void MainWindow::recetteChoisis(int index){
     ui->teRecetteDescription->clear();
     ui->imageRecette->clear();
 
-    //if (recette == "NOTHING"){ //TODO : <--- recette.at(0) == "NOTHING"
     if (recette.at(0) == "NOTHING"){
         recetteSelectionne.clear();
         ui->pbRecherche->setEnabled(false);
@@ -226,7 +218,7 @@ void MainWindow::clickListerIngredients(){
         itemExpanded.clear();
 
         if (rootName.toString() == recetteSelectionne.at(0)){
-            pourTout(modele);
+            parcourirToutLeModele(modele);
         }
     }
 
@@ -684,16 +676,13 @@ void MainWindow::setAutoExpandFromMenu(bool state){
 /*
  * Fonction qui parcours tout le modele de la vue pour trouver les objets agrandis
  */
-void MainWindow::pourTout(QAbstractItemModel* modele, QModelIndex parent){
+void MainWindow::parcourirToutLeModele(QAbstractItemModel* modele, QModelIndex parent){
     QList<QStandardItem *> rootList;
     QStandardItemModel dernier;
     QModelIndex indexItem;
 
     rootList = this->modele->findItems("Total Matières Premières :", Qt::MatchRecursive);
     indexItem = dernier.indexFromItem(rootList[0]);
-    //qDebug() << "ModelIndex : " << indexItem;
-    //qDebug() << "rowCount   : " << modele->rowCount(parent);
-
 
     for(int r = 0; r < modele->rowCount(parent); ++r) {
         QModelIndex index = modele->index(r, 0, parent);
@@ -710,39 +699,74 @@ void MainWindow::pourTout(QAbstractItemModel* modele, QModelIndex parent){
             if (ui->vue->isExpanded(index)){
                 itemExpanded << index.data(Qt::DisplayRole).toString();
             }
-            qDebug() << "Item  : " << index.data(Qt::DisplayRole).toString();
-            pourTout(modele, index);
+            parcourirToutLeModele(modele, index);
         } else {
             qDebug() << "Item  : " << index.data(Qt::DisplayRole).toString();
         }
-        //qDebug() << "Item  : " << index.data(Qt::DisplayRole).toString();
-        //qDebug() << "Child ? " << modele->hasChildren(index);
-        //qDebug() << "------------------------";
     }
 }
 
+/*
+ * Ouvrir la fenêtre d'ajout de recette
+ */
 void MainWindow::ouvrirFenAjouterRecette()
 {
     if (!getEtatFenAjouterRecette()){
-        fenAjouterRecette = new ajouterRecette(this); // Be sure to destroy your window somewhere
+        // La fenêtre n'est pas déjà ouverte, on cré l'objet, l'affiche et on lie la femeture de la fenêtre à la fonction
+        fenAjouterRecette = new ajouterRecette(this);
         setEtatFenAjouterRecette(true);
         fenAjouterRecette->show();
         connect(fenAjouterRecette, SIGNAL(finished(int)), this, SLOT(fenAjouterRecetteClose(int)));
     } else {
+        // La fenêtre est déjà ouverte, on informe, et on la met au premier plan
         QMessageBox::information(this, "Ajouter une recette", "La fenêtre pour ajouter une recette est déjà ouverte.");
         fenAjouterRecette->raise();
     }
 }
 
+/*
+ * Recupère l'info si la fenêtre d'ajout de recette est déjà ouverte
+ */
 bool MainWindow::getEtatFenAjouterRecette(){
     return fenAjouterRecetteOuverte;
 }
 
+/*
+ * Définis l'info sur l'état de le fenêtre d'ajout de recette
+ */
 void MainWindow::setEtatFenAjouterRecette(bool stated){
     fenAjouterRecetteOuverte = stated;
 }
 
+/*
+ * Lors de la fermeture de la fenêtre d'ajout de recette
+ */
 void MainWindow::fenAjouterRecetteClose(int result){
-    result += 0;
+    result += 0; // Pour supprimer un warning lors de la compilation
+
+    // On définis l'état de la fenêtre à fermer
     setEtatFenAjouterRecette(false);
+    // On bloque le signal du ComboBox, sinon ça plante !
+    ui->qcbListeRecettes->blockSignals(true);
+    // On efface le modèle et listes toutes les recettes pour prendre la nouvelle
+    modele->clear();
+    listeRecettes();
+    // On débloque le signal pour pouvoir restaurer la dernière recette sélectionné si l'utilisateur l'a activé.
+    ui->qcbListeRecettes->blockSignals(false);
+    restaurerDerniereRecette();
+}
+
+/*
+ * Fonction pour restaurer la dernière recette
+ */
+void MainWindow::restaurerDerniereRecette(){
+    // Si l'utilisateur à demandé la restauration de la recette et qu'une vrai recette est stocké dans le fichier, on restaure
+    if (param.getRestoreRecipe() && param.getLastRecipe().at(0).toString() != "DNE"){
+        int index = ui->qcbListeRecettes->findData(param.getLastRecipe());
+        if (index != -1) {
+            ui->qcbListeRecettes->setCurrentIndex(index);
+            ui->sbQuantite->setValue(param.getQteLastRecipe());
+            emit ui->pbRecherche->clicked();
+        }
+    }
 }

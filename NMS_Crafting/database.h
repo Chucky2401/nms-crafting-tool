@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QSqlDriver>
 
 #include "settings.h"
 
@@ -26,12 +27,12 @@ public:
     QString getError();
     void setError(QString error);
 
-    QVariant requete(QString sql);
+    void startTransaction();
+    void stopTransaction(bool error = false);
 
 private:
     QSqlDatabase base;
     QString lastBddError;
-    QSqlQuery query;
 
     class settings param;
 };
