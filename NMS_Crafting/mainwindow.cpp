@@ -3,12 +3,20 @@
 
 #include <QTime>
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent, bool m_test) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ouvertureEnCours = true;
+
+    if (m_test)
+        this->setWindowTitle("NMS Crafting Tool - " + QApplication::applicationVersion() + " - BASE DE TEST");
+    else
+        this->setWindowTitle("NMS Crafting Tool - " + QApplication::applicationVersion());
+
+    param.initialisation(m_test);
+    bdd.initialisation(m_test);
 
     ui->cbFarming->setChecked(param.getFarming());
     ui->aFarming->setChecked(param.getFarming());
@@ -79,6 +87,20 @@ MainWindow::~MainWindow()
  * Fonction pour détecter quand la fenêtre est fermé
  */
 void MainWindow::closeEvent(QCloseEvent *event){
+    if (m_test) {
+        if (getEtatFenAjouterRecette())
+            fenAjouterRecette->close();
+
+        if (bdd.isOpen(connectionName))
+            bdd.closeConnection(connectionName);
+
+        if (param.getRestoreSizePos())
+            param.setGeometrieEtat(saveGeometry(), saveState());
+
+        event->accept();
+        return;
+    }
+
     if (QMessageBox::question(this, "Fermeture", "Voulez-vous fermer le programme ?") == QMessageBox::Yes){
         if (getEtatFenAjouterRecette())
             fenAjouterRecette->close();

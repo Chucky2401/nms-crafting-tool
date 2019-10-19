@@ -39,7 +39,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr, bool m_test = false);
     ~MainWindow();
 
 protected:
@@ -60,6 +60,7 @@ public slots:
 
 
 private:
+    bool m_test;
     ajouterRecette *fenAjouterRecette;
     bool fenAjouterRecetteOuverte;
     bool ouvertureEnCours;

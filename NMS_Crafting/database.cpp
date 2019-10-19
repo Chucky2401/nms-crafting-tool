@@ -1,12 +1,15 @@
 #include "database.h"
 
-database::database()
-{
+database::database() {
 
 }
 
-database::~database(){
+database::~database() {
     this->base.close();
+}
+
+void database::initialisation(bool test) {
+    param.initialisation(test);
 }
 
 /*

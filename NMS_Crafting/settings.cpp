@@ -1,7 +1,10 @@
 #include "settings.h"
 
-settings::settings()
-{
+settings::settings() {
+
+}
+
+void settings::initialisation(bool test) {
     iniParam = new QSettings(QSettings::IniFormat, QSettings::UserScope, "BlackWizard Company", "NMS Crafting Tool");
 
     imagePath = this->getIniImagePath();
@@ -14,10 +17,12 @@ settings::settings()
         this->setBddPath("./bdd/");
     }
 
-    bddName = this->getIniBddName();
-    if (bddName == settingDefaultString){
+    if (test){
         this->setBddName("nms_database-TEST.db");
+    } else {
+        this->setBddName("nms_database.db");
     }
+    bddName = this->getIniBddName();
 
     farming = this->getIniFarming();
     this->setFarming(farming);

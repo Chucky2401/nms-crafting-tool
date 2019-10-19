@@ -18,6 +18,8 @@ class database// : public QSqlDatabase
 public:
     database();
     ~database();
+    void initialisation(bool test = false);
+
     bool createConnection(QString name);
     void closeConnection(QString name);
     bool isOpen(QString name);

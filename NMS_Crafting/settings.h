@@ -12,6 +12,9 @@ class settings
 {
 public:
     settings();
+
+    void initialisation(bool test = false);
+
     void setImagePath(QString path);
     QString getImagePath();
     QString getIniImagePath();
