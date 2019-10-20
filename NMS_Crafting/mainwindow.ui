@@ -405,6 +405,9 @@
    </property>
   </action>
   <action name="aPreferences">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="icones.qrc">
      <normaloff>:/settings_24.png</normaloff>:/settings_24.png</iconset>

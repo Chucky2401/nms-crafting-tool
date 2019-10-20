@@ -613,7 +613,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
         ui->vue->expandAll();
     }
 
-    if(!donneesFarmTrouvee && !ouvertureEnCours){
+    if(param.getFarming() && !donneesFarmTrouvee && !ouvertureEnCours){
         QMessageBox::critical(this, "Données de Farm", "Aucune données de farm trouvée.");
     }
 }
