@@ -162,7 +162,7 @@ Version pour quelque corrections, rien d'exceptionnel
 ### **v0.1.4.7a** - *20/10/2019*
 Première version en pre-release !
 Correction d'un bug, ajout de fonction pour le développement de mon côté.
-* Fenêtre princiapel
+* Fenêtre principale
 	- Correction MessageBox qui apparait pour signaler qu'aucune données de farm n'a été trouvé même si l'option n'est pas activé
 
 ![v0.1.4.7a](https://i.imgur.com/pZL94RK.jpg)
