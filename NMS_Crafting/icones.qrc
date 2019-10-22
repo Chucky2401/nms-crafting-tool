@@ -2,5 +2,16 @@
     <qresource prefix="/">
         <file>NMS_101.ico</file>
         <file>farming_24.png</file>
+        <file>expand_24.png</file>
+        <file>settings_24.png</file>
+        <file>add_24.png</file>
+        <file>close_24.png</file>
+        <file>details_24.png</file>
+        <file>mainPage_24.png</file>
+        <file>memorize_24.png</file>
+        <file>Atlas.png</file>
+        <file>size_24.png</file>
+        <file>recettes_24px.png</file>
+        <file>ressources_24px.png</file>
     </qresource>
 </RCC>

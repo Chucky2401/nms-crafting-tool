@@ -26,6 +26,10 @@
 
 #include <QDebug>
 
+#include "settings.h"
+#include "database.h"
+#include "ajouterrecette.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -35,40 +39,56 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr, bool m_test = false);
     ~MainWindow();
-    bool createConnection();
-    void listeRecettes();
-    void listerIngredients(QString recette);
-    void pourTout(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
+
+protected:
+    void closeEvent(QCloseEvent *event);
 
 public slots:
     void clickListerIngredients();
     void recetteChoisis(int index);
     void modifierQuantite(int valeur);
-    void setFarming(int state);
-    void setAutoExpand(int state);
+    void setFarmingFromButton(int state);
+    void setFarmingFromMenu(bool state);
+    void setAutoExpandFromButton(int state);
+    void setAutoExpandFromMenu(bool state);
+    void setRestoreRecipeFromMenu(bool state);
+    void setRestoreSizePosFromMenu(bool state);
+    void ouvrirFenAjouterRecette();
+    void fenAjouterRecetteClose(int result);
 
 
 private:
+    bool m_test;
+    ajouterRecette *fenAjouterRecette;
+    bool fenAjouterRecetteOuverte;
+    bool ouvertureEnCours;
     const QVariant settingDefaultString = "DNE";
+    const QString defaultString = "NOTHING";
     const QVariant settingDefaultInt = -1;
+    const QString connectionName = "principal";
 
     Ui::MainWindow *ui;
     QSqlDatabase db;
-    QString recetteSelectionne;
+    //QString recetteSelectionne; // <--- QList<QVariant>
+    QList<QVariant> recetteSelectionne;
     QStandardItemModel *modele;
     QGraphicsPixmapItem itemImageRecette;
     QGraphicsScene imageRecette;
     bool viewWasExtended;
     QStringList itemExpanded;
 
-    QSettings *settings;
-    QString imagePath;
-    QString bddPath;
-    QString bddName;
-    QString farming;
-    QString autoExpand;
+    bool createConnection();
+    void listeRecettes();
+    void listerIngredients(QList<QVariant> recette);
+    void parcourirToutLeModele(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
+    bool getEtatFenAjouterRecette();
+    void setEtatFenAjouterRecette(bool stated);
+    void restaurerDerniereRecette();
+
+    class settings param;
+    class database bdd;
 };
 
 #endif // MAINWINDOW_H

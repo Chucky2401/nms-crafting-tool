@@ -2,13 +2,18 @@
 
 ## Description
 Outil permettant de lister les composants d'une recette du jeux No Man's Sky
+**/!\ OUTILS TOUJOURS EN DEVELOPPEMENT /!\\**
 
 ## Fonctionnement
 A partir d'une recette, liste tous les composants nécessaires. Si les composants sont eux aussi une recette, les composants sont aussi listés, et ainsi de suite, de manière récursif. Tout ceci est affiché dans une liste de type arbre (Treeview).
 Finalement, toutes les ressources de base (Carbone, Solanium, etc.) sont listés pour obtenir le total pour la recette principale.
 Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi que le nombre de dome associé.
 
-![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
+![v0.1.4.7-01](https://i.imgur.com/pZL94RK.jpg)
+
+![v0.1.4.7-02](https://i.imgur.com/kc23UgU.jpg)
+
+![v0.1.4.7-03](https://i.imgur.com/NK1CPs9.jpg)
 
 ## Langages
 NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
@@ -22,11 +27,11 @@ Je ne suis pas partis sur cette solution tout de suite car je suis en pleins dé
 ## A venir
 Voici une liste des choses que j'aimerais implémenter (incomplet) :
 - [ ] Utilisation d'une base de données serveur
-- [ ] Permettre l'ajout de recettes
+- [x] Permettre l'ajout de recettes
 - [ ] Gestion des recettes (modification, suppression)
 - [ ] Gestion des ressources (modification, suppression)
-- [ ] Gestion des données de farming
-- [ ] Création d'un installeur
+- [x] Gestion des données de farming
+- [x] Création d'un installeur
   Aujourd'hui je ne sais pas faire (sip...), mais je suis autodidacte, si quelqu'un s'y connaît bien, je suis preneur d'une bonne documentation/tuto :smile:
 - [ ] ...
 
@@ -74,9 +79,94 @@ La liste n'est pas bien longue, mais voici la liste :
 
 ![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
 
+### **v0.1.4.1** - *08/08/2019*
+Au départ, j'étais partie pour implémenter entièrement la fenêtre pour ajouter une recette...
+Au départ... Mais je suis comme un petit oiseau qui vole. Je suis dans mes pensées, et je code comme ça vient !
+Donc, voici les modification :
+
+* Création d'une classe pour les paramètres
+    - set / get / getIni ImagePath()
+    - set / get / getIni BddPath()
+    - set / get / getIni BddName()
+    - set / get / getIni Farming()
+    - set / get / getIni AutoExpand()
+* Modification du menu principale (sous la barre de titre)
+    - Fichier -> Quitter avec une icone
+    - Edition
+        + Ajouter Recette - *Ouvre une fenêtre vide pour le moment*
+    - Outil
+        + Préférences - *Ne fait rien pour le moment. A terme ouvrira une fenêtre de préférence*
+        + Farming - *Lié à la case à cocher dans la fenêtre*
+        + Etendre automatique - *Lié à la case à cocher dans la fenêtre*
+* Surcharge de la method closeEvent pour :
+	1. Fermer toutes les fenêtre modal ouverte
+	2. Demander confirmation avant fermeture
+* **BUG**
+    - Reproduire le bug : *Lister une recette, étendre des objets dans la liste, changer la quantité et actualiser. Changer de recette et lister les ingrédients. Switcher le bouton Farming et actualiser.*
+    - Correction : *Lors du clique sur le bouton Actualiser, ne prendre que les objets qui ont un enfant*
+* Ajout de commentaires dans le code
+
+![v0.1.4.1](https://i.imgur.com/oRX4pLf.jpg)
+
+### **v0.1.4.2** - *10/08/2019*
+Bon, on avance sur la fenêtre d'ajout !
+J'ai mis tous les éléments, dans des onglets. Cela me parait plus claire dans deux onglets distincts. A vous de trancher !
+Voici le détails
+* Fenêtre '*Ajouter une recette*'
+	- Bouton Annuler
+	- Rechercher une icône
+        * Si cette dernière n'est pas dans le répertoire du programme, elle est copié. *C'est cette dernière qui sera utilisé*
+	- Pour le titre et le sous-titre, mis en place du compteur de caractère.
+	- Pour la quantité obtenue, valeur autorisé entre 1 et 5
+	- Pour les quantités nécessaire valeur autorisé entre 1 et 999
+* Fenêtre principale
+	- Ajouter d'une option '*Restaurer dernière recette ?*'
+		*Cette dernière vous permet de mémoriser la dernière recette visualisé avec la quantité lors de l'ouverture du programme.*
+* Modification diverse
+	- Utilisation d'une classe personnalisé pour l'accès à la base de données
+	- Ajout des infos nécessaires à la classe *settings* pour la mémorisation de la recette
+	- Fermeture de la connexion à la base de données lors de fermeture de fenêtre
+
+![v0.1.4.2](https://i.imgur.com/LPkTEdz.jpg)
+
+### **v0.1.4.3** - *11/09/2019*
+Cette version là est pour l'ajout d'une recette.
+Fenêtre finaliser et correction de divers bug.
+* Fenêtre '*Ajouter une recette*'
+	- Remplissage des lists en fonction du type de composant
+	- Insertion dans la base de recettes
+* Fenêtre principale
+	- Bug de quantité sur les ressources
+	- Bug du calcul de quantité nécessaire
+	- Possibilité de mémorisé la position de la fenêtre
+	- Ajout des données de farm si existante
+	- Bug de quantité doubler si deux recettes avec le même nom
+* Divers
+	- Lisibilité du code
+
+### **v0.1.4.4** - *11/09/2019*
+Version pour quelque corrections, rien d'exceptionnel
+* Fenêtre principale
+	- Après l'ajout d'une recette, la liste est mise à jour
+* Fenêtre d'ajout de recette
+	- Peaufinage
+* Divers
+	- Utilisation des transactions SQL
+
+### **v0.1.4.7a** - *20/10/2019*
+Première version en pre-release !
+Correction d'un bug, ajout de fonction pour le développement de mon côté.
+* Fenêtre princiapel
+	- Correction MessageBox qui apparait pour signaler qu'aucune données de farm n'a été trouvé même si l'option n'est pas activé
+
+![v0.1.4.7a](https://i.imgur.com/pZL94RK.jpg)
+
+
 ## Divers
 **16/06/2019** - [Premier post sur le groupe][premierPost]
 **06/08/2019** - Création d'une page [Facebook][nmsctFacebook]
+**07/08/2019** - Hébergement web gratuit réservé [NMSCT][epizy.com]
+**22/10/2019** - Ouverture du GitHub en "public" et livraison pre-release [GitHub][github]
 
 ## References
 [Qt]: https://www.qt.io/
@@ -84,6 +174,8 @@ La liste n'est pas bien longue, mais voici la liste :
 [nmsfr]: https://www.facebook.com/groups/215415605504595
 [premierPost]: https://www.facebook.com/groups/215415605504595/permalink/831562540556562/
 [nmsctFacebook]: https://www.facebook.com/NMS-Crafting-Tool-107068020644537
+[epizy.com]: http://nmsct.epizy.com
+[github]: https://github.com/Chucky2401/nms-crafting-tool/releases/tag/v0.1.4.7a
 
 ## Notes
 <a name="nmsct">1</a>: NMSCT pour NMS Crafting Tool
