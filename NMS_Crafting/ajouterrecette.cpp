@@ -1,11 +1,14 @@
 #include "ajouterrecette.h"
 #include "ui_ajouterrecette.h"
 
-ajouterRecette::ajouterRecette(QWidget *parent) :
+ajouterRecette::ajouterRecette(QWidget *parent, bool m_test) :
     QDialog(parent),
     ui(new Ui::ajouterRecette)
 {
     ui->setupUi(this);
+
+    param.initialisation(m_test);
+    bdd.initialisation(m_test);
 
     bool test = bdd.createConnection(connectionName);
     if(!test){

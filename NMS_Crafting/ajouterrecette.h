@@ -23,7 +23,7 @@ class ajouterRecette : public QDialog
     Q_ENUMS(eCombo)
 
 public:
-    explicit ajouterRecette(QWidget *parent = nullptr);
+    explicit ajouterRecette(QWidget *parent = nullptr, bool m_test = false);
     ~ajouterRecette();
     enum eTypeComposant {
         RESSOURCE, RECETTE
@@ -49,6 +49,7 @@ private slots:
     void cliqueSurValider();
 
 private:
+    bool m_test;
     Ui::ajouterRecette *ui;
     const QString connectionName = "ajoutRecette";
     const QString defaultString = "NOTHING";
