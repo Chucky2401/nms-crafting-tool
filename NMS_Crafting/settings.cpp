@@ -1,6 +1,8 @@
 #include "settings.h"
 
 settings::settings() {
+    m_qsAppdataPath = qEnvironmentVariable("APPDATA");
+    m_qsPathRoamingBdd = m_qsAppdataPath + "\\BlackWizard Company\\bdd\\";
 
 }
 
@@ -14,7 +16,7 @@ void settings::initialisation(bool test) {
 
     bddPath = this->getIniBddPath();
     if (bddPath == settingDefaultString){
-        this->setBddPath("./bdd/");
+        this->setBddPath(m_qsPathRoamingBdd);
     }
 
     if (test){

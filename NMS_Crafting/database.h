@@ -21,6 +21,7 @@ public:
     void initialisation(bool test = false);
 
     bool createConnection(QString name);
+    bool initialisationTable();
     void closeConnection(QString name);
     bool isOpen(QString name);
     QSqlDatabase getBase();

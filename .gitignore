@@ -27,3 +27,4 @@ Web/
 # information for Eclipse / Flash Builder.
 README.pdf
 *.pdf
+NMS_Crafting/nms_database.db.sql

@@ -65,6 +65,8 @@ private:
     const QVariant settingDefaultBool = false;
     const QVariant settingDefaultByteArray = "DNE";
 
+    QString m_qsAppdataPath;
+    QString m_qsPathRoamingBdd;
     QSettings *iniParam;
     QString imagePath;
     QString bddPath;

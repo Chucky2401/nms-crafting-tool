@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QApplication::setApplicationName("NMS Crafting Tool");
-    QApplication::setApplicationVersion("0.1.4.5a");
+    QApplication::setApplicationVersion("0.1.4.8a");
     QCommandLineParser parser;
     bool test;
 
@@ -35,10 +35,6 @@ int main(int argc, char *argv[])
     QSplashScreen splash(pixmap);
     splash.show();
     app.processEvents();
-
-    QTime dieTime= QTime::currentTime().addSecs(3);
-        while (QTime::currentTime() < dieTime)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
     MainWindow window(nullptr, test);
     window.show();
