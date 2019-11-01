@@ -43,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
 
     m_qnamManager = new QNetworkAccessManager();
 
+    #ifndef QT_DEBUG
+        ui->pbTest->setVisible(false);
+    #endif
+
     /*
      * Connecteurs !
      */
@@ -917,13 +921,19 @@ void MainWindow::restaurerDerniereRecette(){
     }
 }
 
+/*
+ * Ouvrir la fenêtre a propos
+ */
 void MainWindow::ouvrirAPropos(){
     diaAPropos = new DIA_apropos();
     diaAPropos->setWindowFlags(Qt::FramelessWindowHint);
     diaAPropos->setStyleSheet("QDialog { border: 1px solid gray }");
-    diaAPropos->exec();
+    diaAPropos->show();
 }
 
+/*
+ * Pour faire des tests
+ */
 void MainWindow::fonctionPourTest(){
     if(ui->cbFarming->isVisible())
         ui->cbFarming->setHidden(true);

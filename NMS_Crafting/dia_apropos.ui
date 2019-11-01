@@ -98,7 +98,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pbFermer">
        <property name="text">
         <string>Fermer</string>
        </property>
@@ -124,14 +124,14 @@
  <resources/>
  <connections>
   <connection>
-   <sender>pushButton</sender>
+   <sender>pbFermer</sender>
    <signal>clicked()</signal>
    <receiver>DIA_apropos</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>200</x>
-     <y>271</y>
+     <x>239</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel">
      <x>350</x>

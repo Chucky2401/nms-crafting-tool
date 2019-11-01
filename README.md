@@ -21,6 +21,8 @@ Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi
 
 ![v0.1.4.7-03](https://i.imgur.com/NK1CPs9.jpg)
 
+![v0.1.5.2a](https://i.imgur.com/hBCFltx.jpg)
+
 ## Langages
 NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
 Pour la base de données j'utilise SQLite v3. A terme, pour que le logiciel soit le plus "communautaire" possible, je basculerais sur une base de données serveur (MariaDB - PostgreSQL étant surdimensionné pour la quantité de données aujourd'hui).
@@ -32,13 +34,17 @@ Je ne suis pas partis sur cette solution tout de suite car je suis en pleins dé
 
 ## A venir
 Voici une liste des choses que j'aimerais implémenter (incomplet) :
-- [ ] Utilisation d'une base de données serveur
+- [ ] ~~Utilisation d'une base de données serveur~~
 - [x] Permettre l'ajout de recettes
 - [ ] Gestion des recettes (modification, suppression)
 - [ ] Gestion des ressources (modification, suppression)
+- [ ] Export / Import des recettes
 - [x] Gestion des données de farming
 - [x] Création d'un installeur
-  Aujourd'hui je ne sais pas faire (sip...), mais je suis autodidacte, si quelqu'un s'y connaît bien, je suis preneur d'une bonne documentation/tuto :smile:
+  ~~Aujourd'hui je ne sais pas faire (sip...), mais je suis autodidacte, si quelqu'un s'y connaît bien, je suis preneur d'une bonne documentation/tuto :smile:~~
+- [ ] Mise en place des mises à jour
+- [ ] Modification de l'interface
+  *Masquage bouton, etc.*
 - [ ] ...
 
 ## Suivis des modifications
@@ -167,12 +173,39 @@ Correction d'un bug, ajout de fonction pour le développement de mon côté.
 
 ![v0.1.4.7a](https://i.imgur.com/pZL94RK.jpg)
 
+### **v0.1.5.1a** - *29/10/2019*
+Version qui modifie un peu le fonctionnement du logiciel.
+Après divers tests avec le Qt Installer Framework, pour l'installation du programme et la possibilité de mettre à jour, j'ai déplacé la base de données.
+Cela pour une raison simple, lors de l'installation de la mise à jour, elle était écrasé...
+Enfin, au premier lancement du programme, si la base n'existe pas elle est créée avec des données de bases (celle avec lesquelles que je travail pour mes tests).
+* Classe database
+	- Initialise la base de données si inexistante.
+* Classe settings
+	- Modification des chemins de la base
+
+### **v0.1.5.2a** - *01/11/2019*
+Comme j'ai utilisé Qt Installer Framework pour déployer l'application, j'ai fait des tests pour les mises à jour.
+Pour cela, il faut utiliser un dépôts sur un serveur. Or, la seule solution native pour vérifier les mises à jour est de lancer l'exécutable prévu à cette effet.
+J'ai donc intégrer la possibilitée de vérifier les mises à jour dans l'applications.
+J'ai aussi ajouté un menu pour afficher le A Propos, inutile mais je voulais l'ajouter :).
+* Fenêtre principale
+	- [Ajout] Ajout du menu 'A Propos'
+	- [Ajout] AJout du menu 'Vérifier mise à jour'
+	- [Bug] Correction d'un bug si modification de la quantité mais qu'aucune recette n'est sélectionné.
+* Classe settings
+	- [Amélioration] Suppression du nom de la base de données suite à la modification des paramètres en ligne de commande.
+* Fenêtre A Propos
+	- [Ajout] Création
+
+![v0.1.5.2a](https://i.imgur.com/hBCFltx.jpg)
+
 
 ## Divers
 **16/06/2019** - [Premier post sur le groupe][premierPost]
 **06/08/2019** - Création d'une page [Facebook][nmsctFacebook]
 **07/08/2019** - Hébergement web gratuit réservé [NMSCT][epizy.com]
 **22/10/2019** - Ouverture du GitHub en "public" et livraison pre-release [GitHub][github]
+**31/10/2019** - Changement d'hébergeur pour le site. Qui permet l'utilisation du repository [PlanetHoster][planethoster]
 
 ## References
 [Qt]: https://www.qt.io/
@@ -182,6 +215,7 @@ Correction d'un bug, ajout de fonction pour le développement de mon côté.
 [nmsctFacebook]: https://www.facebook.com/NMS-Crafting-Tool-107068020644537
 [epizy.com]: http://nmsct.epizy.com
 [github]: https://github.com/Chucky2401/nms-crafting-tool/releases/tag/v0.1.4.7a
+[planethoster]:http://nmsct.blackwizard.yj.fr/
 
 ## Notes
 <a name="nmsct">1</a>: NMSCT pour NMS Crafting Tool
