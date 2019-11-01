@@ -24,7 +24,7 @@ public:
     QString getIniBddPath();
 
     void setBddName(QString name);
-    QString getIniBddName();
+    //QString getIniBddName();
     QString getBddName();
 
     void setFarming(bool enabled);

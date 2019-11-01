@@ -22,14 +22,6 @@ bool database::createConnection(QString name)
     this->base = QSqlDatabase::addDatabase("QSQLITE", name);
     this->resetAll();
 
-//    if (!QFile::exists(param.getBddPath() + param.getBddName())){
-//        qDebug() << param.getBddPath() + param.getBddName() << " - La base n'existe pas ! / " << name;
-//        QFile qfBaseDeDonnees(param.getBddPath() + param.getBddName());
-//        qfBaseDeDonnees.open(QIODevice::WriteOnly);
-//        qfBaseDeDonnees.close();
-//        bCreationReussi = initialisationTable(name);
-//    }
-
     if(!QFile::exists(param.getBddPath()+param.getBddName())){
         qDebug() << param.getBddPath() + param.getBddName() << " - La base n'existe pas ! / " << name;
         QFile qfBaseDeDonnees(param.getBddPath() + param.getBddName());

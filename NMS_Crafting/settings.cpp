@@ -24,7 +24,7 @@ void settings::initialisation(bool test) {
     } else {
         this->setBddName("nms_database.db");
     }
-    bddName = this->getIniBddName();
+    //bddName = this->getIniBddName();
 
     farming = this->getIniFarming();
     this->setFarming(farming);
@@ -72,16 +72,16 @@ QString settings::getIniBddPath(){
 
 void settings::setBddName(QString name){
     this->bddName = name;
-    iniParam->setValue("bdd/name", name);
+    //iniParam->setValue("bdd/name", name);
 }
 
 QString settings::getBddName(){
     return this->bddName;
 }
 
-QString settings::getIniBddName(){
-    return iniParam->value("bdd/name", settingDefaultString).toString();
-}
+//QString settings::getIniBddName(){
+//    return iniParam->value("bdd/name", settingDefaultString).toString();
+//}
 
 void settings::setFarming(bool enabled){
     this->farming = enabled;

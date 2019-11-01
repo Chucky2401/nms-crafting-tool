@@ -22,13 +22,19 @@
 #include <QPixmap>
 #include <QIcon>
 
-#include <QSettings>
+#include <QUrl>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QtXml>
+#include <QProcess>
 
 #include <QDebug>
 
 #include "settings.h"
 #include "database.h"
 #include "ajouterrecette.h"
+#include "dia_apropos.h"
 
 namespace Ui {
 class MainWindow;
@@ -45,6 +51,10 @@ public:
 protected:
     void closeEvent(QCloseEvent *event);
 
+signals:
+    void downloaded(bool ecrireFichierUpdate);
+    void fermeture();
+
 public slots:
     void clickListerIngredients();
     void recetteChoisis(int index);
@@ -55,29 +65,47 @@ public slots:
     void setAutoExpandFromMenu(bool state);
     void setRestoreRecipeFromMenu(bool state);
     void setRestoreSizePosFromMenu(bool state);
+
     void ouvrirFenAjouterRecette();
     void fenAjouterRecetteClose(int result);
 
+    void ouvrirAPropos();
+
+    void verifierMiseAJour();
+
+private slots:
+    void fichierTelecharge(QNetworkReply* pReply);
+    void comparaisonVersion(bool ecrireFichier);
+
+    void fonctionPourTest();
+
 
 private:
-    bool m_test;
-    ajouterRecette *fenAjouterRecette;
-    bool fenAjouterRecetteOuverte;
-    bool ouvertureEnCours;
     const QVariant settingDefaultString = "DNE";
     const QString defaultString = "NOTHING";
     const QVariant settingDefaultInt = -1;
     const QString connectionName = "principal";
 
+    bool m_test;
+    ajouterRecette *fenAjouterRecette;
+    bool fenAjouterRecetteOuverte;
+    bool ouvertureEnCours;
+    DIA_apropos *diaAPropos;
+
     Ui::MainWindow *ui;
     QSqlDatabase db;
-    //QString recetteSelectionne; // <--- QList<QVariant>
     QList<QVariant> recetteSelectionne;
     QStandardItemModel *modele;
     QGraphicsPixmapItem itemImageRecette;
     QGraphicsScene imageRecette;
     bool viewWasExtended;
     QStringList itemExpanded;
+
+    QNetworkAccessManager *m_qnamManager;
+    QByteArray m_qbaDonneesTelechargees;
+
+    class settings param;
+    class database bdd;
 
     bool createConnection();
     void listeRecettes();
@@ -86,9 +114,6 @@ private:
     bool getEtatFenAjouterRecette();
     void setEtatFenAjouterRecette(bool stated);
     void restaurerDerniereRecette();
-
-    class settings param;
-    class database bdd;
 };
 
 #endif // MAINWINDOW_H

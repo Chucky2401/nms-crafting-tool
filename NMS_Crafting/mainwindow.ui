@@ -295,14 +295,14 @@
         <item>
          <widget class="QPushButton" name="pbExpand">
           <property name="text">
-           <string>Etendre Tout</string>
+           <string>Déployer Tout</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pbCollapse">
           <property name="text">
-           <string>Replier Tout</string>
+           <string>Réduire Tout</string>
           </property>
          </widget>
         </item>
@@ -335,6 +335,19 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbTest">
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>T</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -376,9 +389,17 @@
     <addaction name="aAutoExpand"/>
     <addaction name="aFarming"/>
    </widget>
+   <widget class="QMenu" name="mAide">
+    <property name="title">
+     <string>?</string>
+    </property>
+    <addaction name="aVerifMiseAJour"/>
+    <addaction name="aAPropos"/>
+   </widget>
    <addaction name="mFichier"/>
    <addaction name="mEditer"/>
    <addaction name="mOutil"/>
+   <addaction name="mAide"/>
   </widget>
   <action name="aQuitter">
    <property name="icon">
@@ -462,6 +483,16 @@
    </property>
    <property name="text">
     <string>Restaurer taille &amp;&amp; position</string>
+   </property>
+  </action>
+  <action name="aAPropos">
+   <property name="text">
+    <string>A &amp;Propos...</string>
+   </property>
+  </action>
+  <action name="aVerifMiseAJour">
+   <property name="text">
+    <string>Vérifier les mises à jour</string>
    </property>
   </action>
  </widget>

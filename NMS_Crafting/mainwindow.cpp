@@ -41,9 +41,12 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
     modele = new QStandardItemModel();
     setEtatFenAjouterRecette(false);
 
+    m_qnamManager = new QNetworkAccessManager();
+
     /*
      * Connecteurs !
      */
+    // Signaux de l'interface GUI
     connect(ui->qcbListeRecettes, SIGNAL(currentIndexChanged(int)), this, SLOT(recetteChoisis(int)));
     connect(ui->pbRecherche, SIGNAL(clicked()), this, SLOT(clickListerIngredients()));
     connect(ui->sbQuantite, SIGNAL(valueChanged(int)), this, SLOT(modifierQuantite(int)));
@@ -54,7 +57,14 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
     connect(ui->aRestaurerTaillePosition, SIGNAL(toggled(bool)), this, SLOT(setRestoreSizePosFromMenu(bool)));
     connect(ui->aFarming, SIGNAL(toggled(bool)), this, SLOT(setFarmingFromMenu(bool)));
     connect(ui->aAutoExpand, SIGNAL(toggled(bool)), this, SLOT(setAutoExpandFromMenu(bool)));
+    connect(ui->aVerifMiseAJour, SIGNAL(triggered()), this, SLOT(verifierMiseAJour()));
+    connect(ui->aAPropos, SIGNAL(triggered()), this, SLOT(ouvrirAPropos()));
     connect(ui->aQuitter, SIGNAL(triggered()), this, SLOT(close()));
+    // Signaux en dehors de l'interface GUI
+    connect(m_qnamManager, SIGNAL (finished(QNetworkReply*)), this, SLOT(fichierTelecharge(QNetworkReply*)));
+    connect(this, SIGNAL(downloaded(bool)), this, SLOT(comparaisonVersion(bool)));
+    // TEST
+    connect(ui->pbTest, SIGNAL(clicked()), this, SLOT(fonctionPourTest()));
 
     /*
      * Restaure la dernière recette si voulu par l'utilisateur et que la recette est défins dans le .ini
@@ -623,7 +633,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
  */
 void MainWindow::modifierQuantite(int valeur){
     valeur += 0;
-    if (recetteSelectionne.at(0).toString() != "" && modele->hasChildren()){
+    if (!recetteSelectionne.isEmpty() && recetteSelectionne.at(0).toString() != "" && modele->hasChildren()){
         ui->pbRecherche->setText("Actualiser");
     }
     param.setQteLastRecipe(ui->sbQuantite->value());
@@ -729,6 +739,120 @@ void MainWindow::parcourirToutLeModele(QAbstractItemModel* modele, QModelIndex p
 }
 
 /*
+ * Slot de vérification des mises à jour.
+ * Télécharge le fichier Updates.xml du repository pour lecture.
+ */
+void MainWindow::verifierMiseAJour(){
+    QUrl url("http://nmsct.000webhostapp.com/repository/Updates.xml");
+    QNetworkRequest request;
+
+    qDebug() << "On récupère les données du fichier depuis le repository Online";
+    request.setUrl(url);
+    m_qnamManager->get(request);
+
+}
+
+/*
+ * Quand le QNetworkManager (m_qnamManager) émet le signal que le téléchargement est finis,
+ * ce slot est appelé.
+ * Dans ce slot, on lit les données récupéré dans un QByteArray, on marque le QNetworkReply (pReply) à supprimer
+ * et on émet le signal downloaded() pour indiquer que l'on a tout télécharger correctement.
+ */
+void MainWindow::fichierTelecharge(QNetworkReply* pReply){
+    m_qbaDonneesTelechargees = pReply->readAll();
+    pReply->deleteLater();
+    emit downloaded(true);
+}
+
+/*
+ * Ce slot est appelé lors de l'émission du signal downloaded().
+ * Ici, on écrit le fichier Updates.xml en local (inutile) et on lis les données XML récupérées
+ * pour récupérer la version du repository.
+ * On compare numéro après numéro pour voir s'il y a une mise à jour.
+ */
+void MainWindow::comparaisonVersion(bool ecrireFichier){
+    QFile qfUpdateXml("Updates.xml");
+    QDomDocument qddXmlBOM;
+    QString qsVersionOnline;
+    QString qsVersionLocal = QApplication::applicationVersion();
+    QStringList qslVersionOnline, qslVersionLocal;
+    bool bMiseAJourNecessaire = false;
+
+    qsVersionLocal.replace(QRegExp("[a-z]"), "");
+
+    if(ecrireFichier){
+        if(!qfUpdateXml.open(QIODevice::ReadWrite)){
+            qDebug() << "Fichier Updates.xml non ouvert en lecture/écriture";
+            QMessageBox::critical(this, "Mise à jour", "Erreur lors de la vérification des mises à jour.");
+            return;
+        } else {
+            qDebug() << "Fichier Updates.xml écrit";
+            qfUpdateXml.write(m_qbaDonneesTelechargees);
+            qfUpdateXml.close();
+        }
+    }
+
+    if(qfUpdateXml.open(QIODevice::ReadOnly)){
+        qDebug() << "Contenu de l'object QDomDocument définis";
+        qddXmlBOM.setContent(m_qbaDonneesTelechargees);
+    } else {
+        qDebug() << "Fichier Updates.xml non ouvert en lecture seule";
+        QMessageBox::critical(this, "Mise à jour", "Erreur lors de la vérification des mises à jour.");
+        return;
+    }
+    qfUpdateXml.close();
+
+    // Extract the root markup
+    QDomElement root = qddXmlBOM.documentElement();
+
+    // Get the first child of the root (Markup COMPONENT is expected)
+    QDomElement Component = root.firstChild().toElement();
+
+    while(!Component.isNull()) {
+        if (Component.tagName() == "PackageUpdate") {
+            QDomElement Child = Component.firstChild().toElement();
+
+            while (!Child.isNull()) {
+                if (Child.tagName() == "Version") {
+                    qsVersionOnline = Child.firstChild().toText().data();
+                }
+                Child = Child.nextSibling().toElement();
+            }
+        }
+        Component = Component.nextSibling().toElement();
+    }
+    qslVersionOnline = qsVersionOnline.split(".");
+    qslVersionLocal = qsVersionLocal.split(".");
+
+    for(int i = 0; i < qslVersionOnline.size(); i++) {
+        if(!bMiseAJourNecessaire) {
+            if(qslVersionOnline > qslVersionLocal)
+                bMiseAJourNecessaire = true;
+        }
+    }
+
+    if(bMiseAJourNecessaire){
+        if(QMessageBox::information(this, "Mise à jour disponible", "La version " + qsVersionOnline + " est disponible.\n Voulez-vous mettre à jour ?", QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+            qDebug() << "On lance la mise à jour";
+            QProcess *qpOutilDeMaintenance = new QProcess();
+            QStringList arguments;
+            arguments << "--updated";
+            qpOutilDeMaintenance->setProgram("maintenancetool.exe");
+            qpOutilDeMaintenance->setArguments(arguments);
+            qpOutilDeMaintenance->startDetached();
+
+            // Fermer la fenêtre
+            qDebug() << "On ferme la fenêtre";
+            emit fermeture();
+        } else {
+            qDebug() << "L'utilisateur ne veut pas mettre à jour";
+        }
+    } else {
+        QMessageBox::information(this, "Pas de nouvelle version", "La version <strong>" + qsVersionLocal + "</strong> est la plus récente.");
+    }
+}
+
+/*
  * Ouvrir la fenêtre d'ajout de recette
  */
 void MainWindow::ouvrirFenAjouterRecette()
@@ -791,4 +915,18 @@ void MainWindow::restaurerDerniereRecette(){
             emit ui->pbRecherche->clicked();
         }
     }
+}
+
+void MainWindow::ouvrirAPropos(){
+    diaAPropos = new DIA_apropos();
+    diaAPropos->setWindowFlags(Qt::FramelessWindowHint);
+    diaAPropos->setStyleSheet("QDialog { border: 1px solid gray }");
+    diaAPropos->exec();
+}
+
+void MainWindow::fonctionPourTest(){
+    if(ui->cbFarming->isVisible())
+        ui->cbFarming->setHidden(true);
+    else
+        ui->cbFarming->setHidden(false);
 }

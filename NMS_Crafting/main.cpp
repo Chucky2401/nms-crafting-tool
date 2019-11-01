@@ -7,12 +7,13 @@
 #include <QDebug>
 #include <QString>
 #include <QStringList>
+#include <QMessageBox>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QApplication::setApplicationName("NMS Crafting Tool");
-    QApplication::setApplicationVersion("0.1.4.8a");
+    QApplication::setApplicationVersion("0.1.5.1a");
     QCommandLineParser parser;
     bool test;
 
