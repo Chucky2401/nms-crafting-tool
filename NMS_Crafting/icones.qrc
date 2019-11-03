@@ -13,5 +13,7 @@
         <file>size_24.png</file>
         <file>recettes_24px.png</file>
         <file>ressources_24px.png</file>
+        <file>about_24.png</file>
+        <file>update_24.png</file>
     </qresource>
 </RCC>

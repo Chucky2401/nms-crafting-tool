@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QApplication::setApplicationName("NMS Crafting Tool");
-    QApplication::setApplicationVersion("0.1.5.2a");
+    QApplication::setApplicationVersion("0.1.5.3a");
     QCommandLineParser parser;
     bool test;
 

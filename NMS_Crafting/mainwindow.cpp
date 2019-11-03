@@ -10,6 +10,15 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
     ui->setupUi(this);
     ouvertureEnCours = true;
 
+    if(param.getVerificationAutoMiseAJour() && QDate::currentDate() == param.getProchaineVerificationMiseAJour()) {
+        qDebug() << "On vérifie les mises à jour";
+        param.setProchaineVerificationMiseAJour(QDate::currentDate().addDays(param.getNombreJourMiseAJour()));
+        qDebug() << param.getProchaineVerificationMiseAJour();
+        verifierMiseAJour();
+    } else {
+        qDebug() << "On ne vérifie pas les mise à jour";
+    }
+
     if (m_test)
         this->setWindowTitle("NMS Crafting Tool - " + QApplication::applicationVersion() + " - BASE DE TEST");
     else
@@ -26,6 +35,9 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
 
     ui->aRestoreRecipe->setChecked(param.getRestoreRecipe());
     ui->aRestaurerTaillePosition->setChecked(param.getRestoreSizePos());
+
+    ui->cbFarming->setVisible(param.getVisibiliteFarming());
+    ui->cbAutoExpand->setVisible(param.getVisibiliteDeploiementAuto());
 
     bool test = bdd.createConnection(connectionName);
     if(!test){
@@ -63,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
     connect(ui->aAutoExpand, SIGNAL(toggled(bool)), this, SLOT(setAutoExpandFromMenu(bool)));
     connect(ui->aVerifMiseAJour, SIGNAL(triggered()), this, SLOT(verifierMiseAJour()));
     connect(ui->aAPropos, SIGNAL(triggered()), this, SLOT(ouvrirAPropos()));
+    connect(ui->aPreferences, SIGNAL(triggered()), this, SLOT(ouvrirParametres()));
     connect(ui->aQuitter, SIGNAL(triggered()), this, SLOT(close()));
     // Signaux en dehors de l'interface GUI
     connect(m_qnamManager, SIGNAL (finished(QNetworkReply*)), this, SLOT(fichierTelecharge(QNetworkReply*)));
@@ -836,7 +849,7 @@ void MainWindow::comparaisonVersion(bool ecrireFichier){
     }
 
     if(bMiseAJourNecessaire){
-        if(QMessageBox::information(this, "Mise à jour disponible", "La version " + qsVersionOnline + " est disponible.\n Voulez-vous mettre à jour ?", QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+        if(QMessageBox::question(this, "Mise à jour disponible", "La version " + qsVersionOnline + " est disponible.\n Voulez-vous mettre à jour ?", QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
             qDebug() << "On lance la mise à jour";
             QProcess *qpOutilDeMaintenance = new QProcess();
             QStringList arguments;
@@ -848,11 +861,15 @@ void MainWindow::comparaisonVersion(bool ecrireFichier){
             // Fermer la fenêtre
             qDebug() << "On ferme la fenêtre";
             emit fermeture();
+            if(ouvertureEnCours)
+                exit(1);
         } else {
             qDebug() << "L'utilisateur ne veut pas mettre à jour";
         }
     } else {
-        QMessageBox::information(this, "Pas de nouvelle version", "La version <strong>" + qsVersionLocal + "</strong> est la plus récente.");
+        qDebug() << "Pas de mise à jour";
+        if(!ouvertureEnCours)
+            QMessageBox::information(this, "Pas de nouvelle version", "La version <strong>" + qsVersionLocal + "</strong> est la plus récente.");
     }
 }
 
@@ -863,10 +880,10 @@ void MainWindow::ouvrirFenAjouterRecette()
 {
     if (!getEtatFenAjouterRecette()){
         // La fenêtre n'est pas déjà ouverte, on cré l'objet, l'affiche et on lie la femeture de la fenêtre à la fonction
-        fenAjouterRecette = new ajouterRecette(this);
+        fenAjouterRecette = new ajouterRecette(this, m_test);
         setEtatFenAjouterRecette(true);
-        fenAjouterRecette->show();
         connect(fenAjouterRecette, SIGNAL(finished(int)), this, SLOT(fenAjouterRecetteClose(int)));
+        fenAjouterRecette->show();
     } else {
         // La fenêtre est déjà ouverte, on informe, et on la met au premier plan
         QMessageBox::information(this, "Ajouter une recette", "La fenêtre pour ajouter une recette est déjà ouverte.");
@@ -925,18 +942,40 @@ void MainWindow::restaurerDerniereRecette(){
  * Ouvrir la fenêtre a propos
  */
 void MainWindow::ouvrirAPropos(){
-    diaAPropos = new DIA_apropos();
-    diaAPropos->setWindowFlags(Qt::FramelessWindowHint);
+    diaAPropos = new DIA_apropos(this);
     diaAPropos->setStyleSheet("QDialog { border: 1px solid gray }");
-    diaAPropos->show();
+    diaAPropos->exec();
+    delete diaAPropos;
+}
+
+/*
+ * Ouvrir la fenêtre des paramètres
+ */
+void MainWindow::ouvrirParametres(){
+    diaParametres = new DIA_Parametres(this, m_test);
+    connect(diaParametres, SIGNAL(visibiliteFarming(bool)), this, SLOT(visibiliteFarming(bool)));
+    connect(diaParametres, SIGNAL(visibiliteDeploiementAuto(bool)), this, SLOT(visibiliteDeploiementAuto(bool)));
+    diaParametres->exec();
+    delete diaParametres;
+}
+
+/*
+ * Ce slot est appelé au travers de la fenêtre des paramètres.
+ */
+void MainWindow::visibiliteFarming(bool visible){
+    ui->cbFarming->setVisible(visible);
+}
+
+/*
+ * Ce slot est appelé au travers de la fenêtre des paramètres.
+ */
+void MainWindow::visibiliteDeploiementAuto(bool visible){
+    ui->cbAutoExpand->setVisible(visible);
 }
 
 /*
  * Pour faire des tests
  */
 void MainWindow::fonctionPourTest(){
-    if(ui->cbFarming->isVisible())
-        ui->cbFarming->setHidden(true);
-    else
-        ui->cbFarming->setHidden(false);
+
 }

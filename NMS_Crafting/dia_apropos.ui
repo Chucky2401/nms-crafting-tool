@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>DIA_apropos</class>
  <widget class="QDialog" name="DIA_apropos">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>A Propos</string>
   </property>
   <property name="modal">
    <bool>true</bool>

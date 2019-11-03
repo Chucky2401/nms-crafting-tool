@@ -30,6 +30,7 @@ SOURCES += \
         ajouterrecette.cpp \
         database.cpp \
         dia_apropos.cpp \
+        dia_parametres.cpp \
         main.cpp \
         mainwindow.cpp \
         settings.cpp
@@ -38,12 +39,14 @@ HEADERS += \
         ajouterrecette.h \
         database.h \
         dia_apropos.h \
+        dia_parametres.h \
         mainwindow.h \
         settings.h
 
 FORMS += \
         ajouterrecette.ui \
         dia_apropos.ui \
+        dia_parametres.ui \
         mainwindow.ui
 
 # Default rules for deployment.

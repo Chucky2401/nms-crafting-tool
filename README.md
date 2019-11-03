@@ -13,7 +13,7 @@ Outil permettant de lister les composants d'une recette du jeux No Man's Sky
 ## Fonctionnement
 A partir d'une recette, liste tous les composants nécessaires. Si les composants sont eux aussi une recette, les composants sont aussi listés, et ainsi de suite, de manière récursif. Tout ceci est affiché dans une liste de type arbre (Treeview).
 Finalement, toutes les ressources de base (Carbone, Solanium, etc.) sont listés pour obtenir le total pour la recette principale.
-Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi que le nombre de dome associé.
+Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi que le nombre de dôme associé.
 
 ![v0.1.4.7-01](https://i.imgur.com/pZL94RK.jpg)
 
@@ -23,10 +23,12 @@ Il est aussi possible d'afficher le nombre de plant qu'il sera nécessaire ainsi
 
 ![v0.1.5.2a](https://i.imgur.com/hBCFltx.jpg)
 
+![v0.1.5.3a](https://i.imgur.com/RIB7LZB.jpg)
+
 ## Langages
-NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
-Pour la base de données j'utilise SQLite v3. A terme, pour que le logiciel soit le plus "communautaire" possible, je basculerais sur une base de données serveur (MariaDB - PostgreSQL étant surdimensionné pour la quantité de données aujourd'hui).
-Je ne suis pas partis sur cette solution tout de suite car je suis en pleins développement. De plus, héberger une base de données soit même aujourd'hui et beaucoup trop risqué [Ranswonware Serveur MySQL][ransonwareBDD]. De plus, cela coûtant de l'argent (serveur, nom de domaine et certificat SSL), je ne peux pas me permettre aujourd'hui de payer cela.
+NMSCT<sup>[1](#nmsct)</sup> est développer en C++ avec le Framework [Qt 5.1.3][Qt] (j'essaie de maintenir Qt à jour).
+Pour la base de données j'utilise SQLite v3. A terme, pour que le logiciel soit le plus "communautaire" possible, je basculerais sur une base de données serveur (Maria DB - PostgreSQL étant surdimensionné pour la quantité de données aujourd'hui).
+Je ne suis pas partis sur cette solution tout de suite car je suis en pleins développement. De plus, héberger une base de données soit même aujourd'hui et beaucoup trop risqué [Ransomware Serveur MySQL][ransomwareBDD]. De plus, cela coûtant de l'argent (serveur, nom de domaine et certificat SSL), je ne peux pas me permettre aujourd'hui de payer cela.
 
 ![QtIDE](https://i.imgur.com/xNaFNefm.jpg)
 
@@ -40,10 +42,10 @@ Voici une liste des choses que j'aimerais implémenter (incomplet) :
 - [ ] Gestion des ressources (modification, suppression)
 - [ ] Export / Import des recettes
 - [x] Gestion des données de farming
-- [x] Création d'un installeur
+- [x] Création d'un installeur <sup>[2](#QtIF)</sup>
   ~~Aujourd'hui je ne sais pas faire (sip...), mais je suis autodidacte, si quelqu'un s'y connaît bien, je suis preneur d'une bonne documentation/tuto :smile:~~
-- [ ] Mise en place des mises à jour
-- [ ] Modification de l'interface
+- [x] Mise en place des mises à jour
+- [x] Modification de l'interface
   *Masquage bouton, etc.*
 - [ ] ...
 
@@ -63,7 +65,7 @@ La combo box qui liste les recettes a été modifié pour pouvoir saisir au clav
 ![v0.1.1](https://i.imgur.com/70CpomY.jpg)
 
 ### **v0.1.2** - *16/06/2019*
-Ici gros ajout au niveau du code pour une petite modification<sup>[2](#imageQt)</sup>.
+Ici gros ajout au niveau du code pour une petite modification<sup>[3](#imageQt)</sup>.
 J'ai ajouté toutes les images, dans :
 * La liste des recettes
 * A gauche de la description
@@ -77,8 +79,8 @@ Après presque deux mois d'absence, de nouvelles modifications !
 La liste n'est pas bien longue, mais voici la liste :
 * Ajout d'un menu
   - Seulement un bouton Fichier qui contient Quitter (avec le raccourci Ctrl + Q)
-* Ajout d'une case à cocher 'Farming ?' qui permet d'afficher les données pour l'agriculture. Soit : le nombre de Plant et le nombre de Dome pour la quantité de Plant
-* Ajout d'une seconde case à cocher 'Etendre tout automatiquement ?' qui permet lors de l'affichage des ressources, d'étendre toute la vue automatiquement. De cette manière vous n'êtes pas obligé de cliquer sur chaque ligne ou le bouton 'Etendre Tout'.
+* Ajout d'une case à cocher 'Farming ?' qui permet d'afficher les données pour l'agriculture. Soit : le nombre de Plant et le nombre de Dôme pour la quantité de Plant
+* Ajout d'une seconde case à cocher 'Étendre tout automatiquement ?' qui permet lors de l'affichage des ressources, d'étendre toute la vue automatiquement. De cette manière vous n'êtes pas obligé de cliquer sur chaque ligne ou le bouton 'Étendre Tout'.
 * Utilisation d'un fichier .ini :
   - Groupe BDD
     + Chemin vers la base de données
@@ -87,7 +89,7 @@ La liste n'est pas bien longue, mais voici la liste :
     + Chemin vers les images
   - Groupe Utilisateur
     + Mémoriser l'état du bouton 'Farming ?'
-    + Mémoriser l'état du bouton 'Etendre tout automatiquement ?'
+    + Mémoriser l'état du bouton 'Étendre tout automatiquement ?'
 
 ![v0.1.3](https://i.imgur.com/E6wt7TM.jpg)
 
@@ -109,7 +111,7 @@ Donc, voici les modification :
     - Outil
         + Préférences - *Ne fait rien pour le moment. A terme ouvrira une fenêtre de préférence*
         + Farming - *Lié à la case à cocher dans la fenêtre*
-        + Etendre automatique - *Lié à la case à cocher dans la fenêtre*
+        + Étendre automatique - *Lié à la case à cocher dans la fenêtre*
 * Surcharge de la method closeEvent pour :
 	1. Fermer toutes les fenêtre modal ouverte
 	2. Demander confirmation avant fermeture
@@ -186,18 +188,52 @@ Enfin, au premier lancement du programme, si la base n'existe pas elle est cré�
 ### **v0.1.5.2a** - *01/11/2019*
 Comme j'ai utilisé Qt Installer Framework pour déployer l'application, j'ai fait des tests pour les mises à jour.
 Pour cela, il faut utiliser un dépôts sur un serveur. Or, la seule solution native pour vérifier les mises à jour est de lancer l'exécutable prévu à cette effet.
-J'ai donc intégrer la possibilitée de vérifier les mises à jour dans l'applications.
+J'ai donc intégrer la possibilité de vérifier les mises à jour dans l'applications.
 J'ai aussi ajouté un menu pour afficher le A Propos, inutile mais je voulais l'ajouter :).
+
 * Fenêtre principale
-	- [Ajout] Ajout du menu 'A Propos'
-	- [Ajout] AJout du menu 'Vérifier mise à jour'
-	- [Bug] Correction d'un bug si modification de la quantité mais qu'aucune recette n'est sélectionné.
+	- [Ajout] Menu 'A Propos'
+	- [Ajout] Menu 'Vérifier mise à jour'
+	- [Bug] Correction si modification de la quantité mais qu'aucune recette n'est sélectionné.
 * Classe settings
 	- [Amélioration] Suppression du nom de la base de données suite à la modification des paramètres en ligne de commande.
 * Fenêtre A Propos
 	- [Ajout] Création
 
 ![v0.1.5.2a](https://i.imgur.com/hBCFltx.jpg)
+
+### **v0.1.5.3a** - *03/11/2019*
+Aller, ajout d'une nouvelle fenêtre !
+Il le fallait bien, avec la mise à jour possible avec la nouvelle version, il fallait bien quelque part où le configurer. J'ai donc ajouter la fenêtre des préférences !
+Voici la liste des modifications
+* Fenêtre principale
+	- [Suppression] Option pour restaurer la dernière recette à l'ouverture
+	- [Suppression] Option pour restaurer la taille et la position
+	- [Amélioration] Icone pour les options "A Propos" et "Vérifier les mises à jour"
+	- [Ajout] Vérification des mises à jour en fonction des préférences *(par défaut : désactiver)*
+	- [Amélioration] Modification du message si une mise à jour est disponible *(information -> question)*
+	- [Amélioration] Passage du statut test (vrai ou faux) à la fenêtre Ajouter Recette
+	- [Ajout] Ouverture de la fenêtre
+	- [Ajout] Slots pour l'affichage des cases à cocher "Farming ?" et "Étendre tout automatiquement ?"
+* Fenêtre A Propos
+	- [Amélioration] Ajout d'une barre de titre avec un titre correcte
+* Fenêtre Préférences
+	- [Ajout] Création
+	- [Ajout] Case pour vérifier les mises à jour automatiquement *(par défaut : désactiver)*
+	- [Ajout] Nombre de jours entre chaque vérification *(par défaut : 7)*
+	- [Ajout] Option pour restaurer la taille et la position de la fenêtre *(par défaut : désactiver)*
+	- [Ajout] Option pour restaurer la dernière recette *(par défaut : désactiver)*
+	- [Ajout] Possibilité d'afficher ou masquer le bouton 'Farming ?' *(par défaut : afficher)*
+	- [Ajout] Possibilité d'afficher ou masquer le bouton 'Étendre tout automatiquement ?' *(par défaut : afficher)*
+* Classe settings
+	- [Ajout] Gestion de l'option farming
+	- [Ajout] Gestion de l'option étendre tout automatiquement
+	- [Ajout] Vérification des mises à jour auto
+	- [Ajout] Nombre de jour entre chaque mise à jour
+	- [Ajout] Sauvegarde de la date de prochaine vérification des mises à jour automatique
+	- [Amélioration] Nettoyage du code superflus.
+
+![v0.1.5.3a](https://i.imgur.com/RIB7LZB.jpg)
 
 
 ## Divers
@@ -209,7 +245,7 @@ J'ai aussi ajouté un menu pour afficher le A Propos, inutile mais je voulais l'
 
 ## References
 [Qt]: https://www.qt.io/
-[ransonwareBDD]: https://www.silicon.fr/grandcrab-242223.html
+[ransomwareBDD]: https://www.silicon.fr/grandcrab-242223.html
 [nmsfr]: https://www.facebook.com/groups/215415605504595
 [premierPost]: https://www.facebook.com/groups/215415605504595/permalink/831562540556562/
 [nmsctFacebook]: https://www.facebook.com/NMS-Crafting-Tool-107068020644537
@@ -220,4 +256,6 @@ J'ai aussi ajouté un menu pour afficher le A Propos, inutile mais je voulais l'
 ## Notes
 <a name="nmsct">1</a>: NMSCT pour NMS Crafting Tool
 
-<a name="imageQt">2</a>: Je ne pensais pas qu'ajouter une image avec Qt, surtout avec le besoin de la redimensionner serait aussi complexe...
+<a name="QtIF">2</a>: Finalement, en prenant le temps de lire la documentation et de faire des tests, ce n'est pas si compliqué !
+
+<a name="imageQt">3</a>: Je ne pensais pas qu'ajouter une image avec Qt, surtout avec le besoin de la redimensionner serait aussi complexe...

@@ -6,6 +6,7 @@
 #include <QVariant>
 #include <QByteArray>
 #include <QDebug>
+#include <QDate>
 
 
 class settings
@@ -59,6 +60,26 @@ public:
     bool getIniRestoreSizePos();
     bool getRestoreSizePos();
 
+    void setVisibiliteFarming(bool visible);
+    bool getIniVisibiliteFarming();
+    bool getVisibiliteFarming();
+
+    void setVisibiliteDeploiementAuto(bool visible);
+    bool getIniVisibiliteDeploiementAuto();
+    bool getVisibiliteDeploiementAuto();
+
+    void setVerificationAutoMiseAJour(bool enabled);
+    bool getIniVerificationAutoMiseAJour();
+    bool getVerificationAutoMiseAJour();
+
+    void setNombreJourMiseAJour(int nombreJour);
+    int getIniNombreJourMiseAJour();
+    int getNombreJourMiseAJour();
+
+    void setProchaineVerificationMiseAJour(QDate date);
+    QDate getIniProchaineVerificationMiseAJour();
+    QDate getProchaineVerificationMiseAJour();
+
 private:
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
@@ -74,12 +95,17 @@ private:
     bool farming;
     bool autoExpand;
     bool restoreRecipe;
-    //QString lastRecipe;
     QList<QVariant> lastRecipe;
     int quantiteLastRecipe;
     QByteArray geometrie;
     QByteArray etat;
     bool restoreSizePos;
+    bool m_visibiliteFarming;
+    bool m_visibiliteDeploiementAuto;
+    bool m_verificationAutoMiseAJour;
+    int m_nombreJourMiseAJour;
+    QDate m_prochaineVerificationMiseAJour;
+
 };
 
 #endif // SETTINGS_H

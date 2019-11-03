@@ -35,6 +35,7 @@
 #include "database.h"
 #include "ajouterrecette.h"
 #include "dia_apropos.h"
+#include "dia_parametres.h"
 
 namespace Ui {
     class MainWindow;
@@ -65,9 +66,10 @@ class MainWindow : public QMainWindow {
         class database bdd;
         // Fenêtres complémentaires
         ajouterRecette *fenAjouterRecette;
-        DIA_apropos *diaAPropos;
         bool fenAjouterRecetteOuverte;
         bool ouvertureEnCours;
+        DIA_apropos *diaAPropos;
+        DIA_Parametres *diaParametres;
         // Recettes
         QSqlDatabase db;
         QList<QVariant> recetteSelectionne;
@@ -110,10 +112,14 @@ class MainWindow : public QMainWindow {
         void ouvrirFenAjouterRecette();
         void fenAjouterRecetteClose(int result);
         void ouvrirAPropos();
+        void ouvrirParametres();
         // Mise à jour
         void verifierMiseAJour();
         void fichierTelecharge(QNetworkReply* pReply);
         void comparaisonVersion(bool ecrireFichier);
+        // Fenêtre Paramètres
+        void visibiliteFarming(bool visible);
+        void visibiliteDeploiementAuto(bool visible);
         // TEST
         void fonctionPourTest();
 };

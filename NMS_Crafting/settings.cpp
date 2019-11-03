@@ -42,6 +42,18 @@ void settings::initialisation(bool test) {
     etat = this->getIniEtat();
     restoreSizePos = this->getIniRestoreSizePos();
     this->setRestoreSizePos(restoreSizePos);
+
+    m_visibiliteFarming = this->getIniVisibiliteFarming();
+    this->setVisibiliteFarming(m_visibiliteFarming);
+
+    m_visibiliteDeploiementAuto = this->getIniVisibiliteDeploiementAuto();
+    this->setVisibiliteDeploiementAuto(m_visibiliteDeploiementAuto);
+
+    m_verificationAutoMiseAJour = this->getIniVerificationAutoMiseAJour();
+    this->setVerificationAutoMiseAJour(m_verificationAutoMiseAJour);
+
+    m_nombreJourMiseAJour = this->getIniNombreJourMiseAJour();
+    this->setNombreJourMiseAJour(m_nombreJourMiseAJour);
 }
 
 void settings::setImagePath(QString path){
@@ -192,4 +204,70 @@ bool settings::getIniRestoreSizePos(){
 
 bool settings::getRestoreSizePos(){
     return this->restoreSizePos;
+}
+
+void settings::setVisibiliteFarming(bool visible){
+    this->m_visibiliteFarming = visible;
+    iniParam->setValue("affichage/boutonFarmVisible", visible);
+}
+
+bool settings::getIniVisibiliteFarming(){
+    return iniParam->value("affichage/boutonFarmVisible", true).toBool();
+}
+
+bool settings::getVisibiliteFarming(){
+    return this->m_visibiliteFarming;
+}
+
+void settings::setVisibiliteDeploiementAuto(bool visible){
+    this->m_visibiliteDeploiementAuto = visible;
+    iniParam->setValue("affichage/boutonDeploiementAuto", visible);
+}
+
+bool settings::getIniVisibiliteDeploiementAuto(){
+    return iniParam->value("affichage/boutonDeploiementAuto", true).toBool();
+}
+
+bool settings::getVisibiliteDeploiementAuto(){
+    return this->m_visibiliteDeploiementAuto;
+}
+
+void settings::setVerificationAutoMiseAJour(bool enabled){
+    this->m_verificationAutoMiseAJour = enabled;
+    iniParam->setValue("miseAJour/automatique", enabled);
+}
+
+bool settings::getIniVerificationAutoMiseAJour(){
+    return iniParam->value("miseAJour/automatique", settingDefaultBool).toBool();
+}
+
+bool settings::getVerificationAutoMiseAJour(){
+    return this->m_verificationAutoMiseAJour;
+}
+
+void settings::setNombreJourMiseAJour(int nombreJour){
+    this->m_nombreJourMiseAJour = nombreJour;
+    iniParam->setValue("miseAJour/nombreJour", nombreJour);
+}
+
+int settings::getIniNombreJourMiseAJour(){
+    return iniParam->value("miseAJour/nombreJour", 7).toInt();
+}
+
+int settings::getNombreJourMiseAJour(){
+    return m_nombreJourMiseAJour;
+}
+
+void settings::setProchaineVerificationMiseAJour(QDate date){
+    this->m_prochaineVerificationMiseAJour = date;
+    qDebug() << date;
+    iniParam->setValue("miseAJour/prochaineVerification", date);
+}
+
+QDate settings::getIniProchaineVerificationMiseAJour(){
+    return iniParam->value("miseAJour/prochaineVerification", QDate::currentDate()).toDate();
+}
+
+QDate settings::getProchaineVerificationMiseAJour(){
+    return m_prochaineVerificationMiseAJour;
 }

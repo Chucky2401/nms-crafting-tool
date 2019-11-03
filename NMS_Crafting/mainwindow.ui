@@ -427,7 +427,7 @@
   </action>
   <action name="aPreferences">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="icones.qrc">
@@ -472,6 +472,9 @@
    <property name="text">
     <string>Restaurer dernière recette</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="aRestaurerTaillePosition">
    <property name="checkable">
@@ -484,13 +487,24 @@
    <property name="text">
     <string>Restaurer taille &amp;&amp; position</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="aAPropos">
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/about_24.png</normaloff>:/about_24.png</iconset>
+   </property>
    <property name="text">
     <string>A &amp;Propos...</string>
    </property>
   </action>
   <action name="aVerifMiseAJour">
+   <property name="icon">
+    <iconset resource="icones.qrc">
+     <normaloff>:/update_24.png</normaloff>:/update_24.png</iconset>
+   </property>
    <property name="text">
     <string>Vérifier les mises à jour</string>
    </property>
