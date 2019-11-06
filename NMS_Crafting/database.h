@@ -37,7 +37,7 @@ private:
     QSqlDatabase base;
     QString lastBddError;
 
-    class settings param;
+    class Settings param;
 };
 
 #endif // DATABASE_H

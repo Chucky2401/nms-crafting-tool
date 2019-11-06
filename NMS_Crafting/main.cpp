@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QApplication::setApplicationName("NMS Crafting Tool");
-    QApplication::setApplicationVersion("0.1.5.3a");
+    QApplication::setApplicationVersion("0.1.5.4a");
     QCommandLineParser parser;
-    bool test;
+    bool test = false;
 
     parser.setApplicationDescription(QApplication::translate("main", "Outil pour les recettes de No Man's Sky"));
     parser.addHelpOption();

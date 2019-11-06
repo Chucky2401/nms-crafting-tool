@@ -3,44 +3,37 @@
 
 #include <QTime>
 
-MainWindow::MainWindow(QWidget *parent, bool m_test) :
+MainWindow::MainWindow(QWidget *parent, bool test) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow), m_test(test)
 {
     ui->setupUi(this);
     ouvertureEnCours = true;
-
-    if(param.getVerificationAutoMiseAJour() && QDate::currentDate() == param.getProchaineVerificationMiseAJour()) {
-        qDebug() << "On vérifie les mises à jour";
-        param.setProchaineVerificationMiseAJour(QDate::currentDate().addDays(param.getNombreJourMiseAJour()));
-        qDebug() << param.getProchaineVerificationMiseAJour();
-        verifierMiseAJour();
-    } else {
-        qDebug() << "On ne vérifie pas les mise à jour";
-    }
 
     if (m_test)
         this->setWindowTitle("NMS Crafting Tool - " + QApplication::applicationVersion() + " - BASE DE TEST");
     else
         this->setWindowTitle("NMS Crafting Tool - " + QApplication::applicationVersion());
 
-    param.initialisation(m_test);
+    param = new Settings();
+    param->initialisation(m_test);
+    qInfo() << "Base de données : " << param->getBddName();
     bdd.initialisation(m_test);
 
-    ui->cbFarming->setChecked(param.getFarming());
-    ui->aFarming->setChecked(param.getFarming());
+    ui->cbFarming->setChecked(param->getFarming());
+    ui->aFarming->setChecked(param->getFarming());
 
-    ui->cbAutoExpand->setChecked(param.getAutoExpand());
-    ui->aAutoExpand->setChecked(param.getAutoExpand());
+    ui->cbAutoExpand->setChecked(param->getAutoExpand());
+    ui->aAutoExpand->setChecked(param->getAutoExpand());
 
-    ui->aRestoreRecipe->setChecked(param.getRestoreRecipe());
-    ui->aRestaurerTaillePosition->setChecked(param.getRestoreSizePos());
+    ui->aRestoreRecipe->setChecked(param->getRestoreRecipe());
+    ui->aRestaurerTaillePosition->setChecked(param->getRestoreSizePos());
 
-    ui->cbFarming->setVisible(param.getVisibiliteFarming());
-    ui->cbAutoExpand->setVisible(param.getVisibiliteDeploiementAuto());
+    ui->cbFarming->setVisible(param->getVisibiliteFarming());
+    ui->cbAutoExpand->setVisible(param->getVisibiliteDeploiementAuto());
 
-    bool test = bdd.createConnection(connectionName);
-    if(!test){
+    bool testBdd = bdd.createConnection(connectionName);
+    if(!testBdd){
         QString lastBddError = bdd.getError();
         QMessageBox::critical(this, "Connexion à la BDD", "Echec de la connexion à la Base de Données.\nDétails:\n"+bdd.getError());
         ui->centralWidget->setEnabled(false);
@@ -83,15 +76,29 @@ MainWindow::MainWindow(QWidget *parent, bool m_test) :
     // TEST
     connect(ui->pbTest, SIGNAL(clicked()), this, SLOT(fonctionPourTest()));
 
+    if(param->getVerificationAutoMiseAJour() && QDate::currentDate() == param->getProchaineVerificationMiseAjour()) {
+        qInfo() << "On vérifie les mises à jour.";
+        qDebug() << "Aujourd'hui : " << QDate::currentDate().toString("dd/MM/yyyy");
+        qInfo() << "Dernière Verif : " << param->getDerniereVerificationMiseAJour();
+        qInfo() << "Prochaine vérification : " << param->getProchaineVerificationMiseAjour();
+        param->setDerniereVerificationMiseAJour(QDate::currentDate());
+        verifierMiseAJour();
+    } else {
+        qInfo() << "On ne vérifie pas les mise à jour";
+        qDebug() << "Aujourd'hui : " << QDate::currentDate().toString("dd/MM/yyyy");
+        qInfo() << "Derniere Verif : " << param->getDerniereVerificationMiseAJour();
+        qInfo() << "Prochaine Verif : " << param->getProchaineVerificationMiseAjour();
+    }
+
     /*
      * Restaure la dernière recette si voulu par l'utilisateur et que la recette est défins dans le .ini
      */
     restaurerDerniereRecette();
 
-    if (param.getRestoreSizePos()) {
-        if(param.getEtat() != "DNE" && param.getGeometrie() != "DNE") {
-            this->restoreGeometry(param.getGeometrie());
-            this->restoreState(param.getEtat());
+    if (param->getRestoreSizePos()) {
+        if(param->getEtat() != "DNE" && param->getGeometrie() != "DNE") {
+            this->restoreGeometry(param->getGeometrie());
+            this->restoreState(param->getEtat());
         }
     }
 
@@ -107,6 +114,7 @@ MainWindow::~MainWindow()
         bdd.closeConnection(connectionName);
     if (getEtatFenAjouterRecette())
         fenAjouterRecette->close();
+    delete param;
     delete ui;
 }
 
@@ -114,15 +122,15 @@ MainWindow::~MainWindow()
  * Fonction pour détecter quand la fenêtre est fermé
  */
 void MainWindow::closeEvent(QCloseEvent *event){
-    if (m_test) {
+    if (m_test || !param->getMessageConfirmationFermeture()) {
         if (getEtatFenAjouterRecette())
             fenAjouterRecette->close();
 
         if (bdd.isOpen(connectionName))
             bdd.closeConnection(connectionName);
 
-        if (param.getRestoreSizePos())
-            param.setGeometrieEtat(saveGeometry(), saveState());
+        if (param->getRestoreSizePos())
+            param->setGeometrieEtat(saveGeometry(), saveState());
 
         event->accept();
         return;
@@ -135,8 +143,8 @@ void MainWindow::closeEvent(QCloseEvent *event){
         if (bdd.isOpen(connectionName))
             bdd.closeConnection(connectionName);
 
-        if (param.getRestoreSizePos())
-            param.setGeometrieEtat(saveGeometry(), saveState());
+        if (param->getRestoreSizePos())
+            param->setGeometrieEtat(saveGeometry(), saveState());
 
         event->accept();
     } else {
@@ -149,7 +157,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
  */
 bool MainWindow::createConnection()
 {
-    db.setDatabaseName(param.getBddPath()+param.getBddName());
+    db.setDatabaseName(param->getBddPath()+param->getBddName());
     if (!db.open()) {
         QSqlError error = db.lastError();
         QMessageBox::critical(this, "Connexion à la BDD", "Echec de la connexion à la Base de Données.\nDétails:\n"+error.text());
@@ -196,8 +204,8 @@ void MainWindow::listeRecettes()
                         nomRecetteAffichage = nomRecetteFr;
                         variantCombo << "";
                     }
-                    //ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, nomRecetteFr);
-                    ui->qcbListeRecettes->addItem(QIcon(param.getImagePath()+nomIcone), nomRecetteAffichage, QVariant(variantCombo));
+                    //ui->qcbListeRecettes->addItem(QIcon(param->getImagePath()+nomIcone), nomRecetteAffichage, nomRecetteFr);
+                    ui->qcbListeRecettes->addItem(QIcon(param->getImagePath()+nomIcone), nomRecetteAffichage, QVariant(variantCombo));
                     //qDebug() << variantCombo;
                 }
             }
@@ -234,7 +242,7 @@ void MainWindow::recetteChoisis(int index){
             while(query.next()){
                 QString nomIcone = query.value("recette_icone").toString();
                 QString description = query.value("recette_description").toString();
-                QPixmap image(param.getImagePath()+nomIcone);
+                QPixmap image(param->getImagePath()+nomIcone);
 
                 if (description == ""){
                     description = "<em>Pas de description</em>";
@@ -242,13 +250,13 @@ void MainWindow::recetteChoisis(int index){
 
                 ui->teRecetteDescription->setText(description.replace("\\n", "<br>", Qt::CaseSensitive));
                 ui->imageRecette->setPixmap(image.scaled(100, 100));
-                ui->qcbListeRecettes->setToolTip("<img src='"+param.getImagePath()+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette.at(0).toString()+"</strong> \
+                ui->qcbListeRecettes->setToolTip("<img src='"+param->getImagePath()+nomIcone+"' width='50' height='50' style=\"float:left;\"> <strong style=\"text-align:center;\">"+recette.at(0).toString()+"</strong> \
                                                 <br /><br />"+description);
             }
         }
         ui->pbRecherche->setEnabled(true);
 
-        param.setLastRecipe(recette); //TODO
+        param->setLastRecipe(recette); //TODO
     }
 
 }
@@ -261,7 +269,7 @@ void MainWindow::clickListerIngredients(){
      * On va d'abord chercher tous les éléments qui ont étais étendu par l'utilisateur
      * Si l'auto expand est off, cela ne sert à rien.
      */
-    if (!param.getAutoExpand()){
+    if (!param->getAutoExpand()){
         QModelIndex rootIndex = modele->index(0, 0);
         QVariant rootName = modele->data(rootIndex);
         itemExpanded.clear();
@@ -328,7 +336,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
     // On ajoute notre recette à notre modèle
     rootNom->setEditable(false);
     rootQuantite->setEditable(false);
-    rootNom->setIcon(QIcon(param.getImagePath()+nomIcone));
+    rootNom->setIcon(QIcon(param->getImagePath()+nomIcone));
     root << rootNom << rootQuantite;
     modele->appendRow(root);
 
@@ -426,7 +434,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
                     //TODO : descCourteTemp push_back
 
                     composantNom->setText(nomComposant);
-                    composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
+                    composantNom->setIcon(QIcon(param->getImagePath()+iconeComposant));
                     composantQuantite->setText(quantiteSql);
                 }
 
@@ -466,7 +474,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
                 }
 
                 composantNom->setText(nomComposant);
-                composantNom->setIcon(QIcon(param.getImagePath()+iconeComposant));
+                composantNom->setIcon(QIcon(param->getImagePath()+iconeComposant));
                 composantQuantite->setText(quantite);
                 // On ajoute nos résultats au parents
                 QList<QStandardItem*> composant;
@@ -545,7 +553,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
         composantNombreDome->setEditable(false);
         QList<QStandardItem*> composant;
 
-        if (param.getFarming()){
+        if (param->getFarming()){
             QString nomPlante = "";
             double nombrePlant, nombrePlantParDome = 13;
             int nombrePlantEntier, nombreDomeEntier, quantiteeParPlant = 0;
@@ -589,11 +597,11 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
             composantNom->setText(ressourcesNom.at(i));
         }
         // On définis nos Items
-        composantNom->setIcon(QIcon(param.getImagePath()+ressourcesIcone.at(i)));
+        composantNom->setIcon(QIcon(param->getImagePath()+ressourcesIcone.at(i)));
         composantQuantite->setText(QString::number(ressourcesQuantite.at(i)));
 
         // On ajoute dans le modele
-        if (param.getFarming()){
+        if (param->getFarming()){
             composant << composantNom << composantQuantite << composantNombrePlants << composantNombreDome;
         } else {
             composant << composantNom << composantQuantite;
@@ -602,7 +610,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
     }
 
     // On définis l'en-tête de la vue et lui définis son modèle
-    if (param.getFarming() && donneesFarmTrouvee){
+    if (param->getFarming() && donneesFarmTrouvee){
         header << "Nom" << "Quantité" << "Nombre Plant" << "Nombre Dome";
         //header << "Nom" << "Quantité";
     } else {
@@ -627,7 +635,7 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
      *      2. On récupère son idex
      *      3. S'il n'est pas vide, on l'agrandi.
      */
-    if (itemExpanded.count() != 0 && !param.getAutoExpand()){
+    if (itemExpanded.count() != 0 && !param->getAutoExpand()){
         QList<QStandardItem *> rootList;
         for (int item = 0; item < itemExpanded.count(); item++){
             rootList = modele->findItems(itemExpanded.at(item), Qt::MatchRecursive);
@@ -636,11 +644,11 @@ void MainWindow::listerIngredients(QList<QVariant> recette){
             if (!Items.isEmpty())
                 ui->vue->setExpanded(Items.first(), true);
         }
-    } else if (param.getAutoExpand()) {
+    } else if (param->getAutoExpand()) {
         ui->vue->expandAll();
     }
 
-    if(param.getFarming() && !donneesFarmTrouvee && !ouvertureEnCours){
+    if(param->getFarming() && !donneesFarmTrouvee && !ouvertureEnCours){
         QMessageBox::critical(this, "Données de Farm", "Aucune données de farm trouvée.");
     }
 }
@@ -653,7 +661,7 @@ void MainWindow::modifierQuantite(int valeur){
     if (!recetteSelectionne.isEmpty() && recetteSelectionne.at(0).toString() != "" && modele->hasChildren()){
         ui->pbRecherche->setText("Actualiser");
     }
-    param.setQteLastRecipe(ui->sbQuantite->value());
+    param->setQteLastRecipe(ui->sbQuantite->value());
 }
 
 /*
@@ -663,11 +671,11 @@ void MainWindow::modifierQuantite(int valeur){
 void MainWindow::setFarmingFromButton(int state){
     if (state == 0){
         //unchecked
-        param.setFarming(false);
+        param->setFarming(false);
         ui->aFarming->setChecked(false);
     } else if (state == 2) {
         //checked
-        param.setFarming(true);
+        param->setFarming(true);
         ui->aFarming->setChecked(true);
     }
 }
@@ -677,7 +685,7 @@ void MainWindow::setFarmingFromButton(int state){
  * -- Depuis le menu
  */
 void MainWindow::setFarmingFromMenu(bool state){
-    param.setFarming(state);
+    param->setFarming(state);
     ui->cbFarming->setChecked(state);
 }
 
@@ -686,7 +694,7 @@ void MainWindow::setFarmingFromMenu(bool state){
  * -- Depuis le menu
  */
 void MainWindow::setRestoreRecipeFromMenu(bool state){
-    param.setRestoreRecipe(state);
+    param->setRestoreRecipe(state);
 }
 
 /*
@@ -694,7 +702,7 @@ void MainWindow::setRestoreRecipeFromMenu(bool state){
  * -- Depuis le menu
  */
 void MainWindow::setRestoreSizePosFromMenu(bool state){
-    param.setRestoreSizePos(state);
+    param->setRestoreSizePos(state);
 }
 
 /*
@@ -704,11 +712,11 @@ void MainWindow::setRestoreSizePosFromMenu(bool state){
 void MainWindow::setAutoExpandFromButton(int state){
     if (state == 0){
         //unchecked
-        param.setAutoExpand(false);
+        param->setAutoExpand(false);
         ui->aAutoExpand->setChecked(false);
     } else if (state == 2) {
         //checked
-        param.setAutoExpand(true);
+        param->setAutoExpand(true);
         ui->aAutoExpand->setChecked(true);
     }
 }
@@ -718,7 +726,7 @@ void MainWindow::setAutoExpandFromButton(int state){
  * -- Depuis le menu
  */
 void MainWindow::setAutoExpandFromMenu(bool state){
-    param.setAutoExpand(state);
+    param->setAutoExpand(state);
     ui->cbAutoExpand->setChecked(state);
 }
 
@@ -776,6 +784,7 @@ void MainWindow::verifierMiseAJour(){
  * et on émet le signal downloaded() pour indiquer que l'on a tout télécharger correctement.
  */
 void MainWindow::fichierTelecharge(QNetworkReply* pReply){
+    qDebug() << "On lit les données téléchargées";
     m_qbaDonneesTelechargees = pReply->readAll();
     pReply->deleteLater();
     emit downloaded(true);
@@ -848,6 +857,9 @@ void MainWindow::comparaisonVersion(bool ecrireFichier){
         }
     }
 
+    // On définis la dernière vérification des mises à jour, même si c'est une vérification manuelle
+    param->setDerniereVerificationMiseAJour(QDate::currentDate());
+
     if(bMiseAJourNecessaire){
         if(QMessageBox::question(this, "Mise à jour disponible", "La version " + qsVersionOnline + " est disponible.\n Voulez-vous mettre à jour ?", QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
             qDebug() << "On lance la mise à jour";
@@ -880,7 +892,7 @@ void MainWindow::ouvrirFenAjouterRecette()
 {
     if (!getEtatFenAjouterRecette()){
         // La fenêtre n'est pas déjà ouverte, on cré l'objet, l'affiche et on lie la femeture de la fenêtre à la fonction
-        fenAjouterRecette = new ajouterRecette(this, m_test);
+        fenAjouterRecette = new ajouterRecette(this, this->m_test);
         setEtatFenAjouterRecette(true);
         connect(fenAjouterRecette, SIGNAL(finished(int)), this, SLOT(fenAjouterRecetteClose(int)));
         fenAjouterRecette->show();
@@ -928,11 +940,11 @@ void MainWindow::fenAjouterRecetteClose(int result){
  */
 void MainWindow::restaurerDerniereRecette(){
     // Si l'utilisateur à demandé la restauration de la recette et qu'une vrai recette est stocké dans le fichier, on restaure
-    if (param.getRestoreRecipe() && param.getLastRecipe().at(0).toString() != "DNE"){
-        int index = ui->qcbListeRecettes->findData(param.getLastRecipe());
+    if (param->getRestoreRecipe() && param->getLastRecipe().at(0).toString() != "DNE"){
+        int index = ui->qcbListeRecettes->findData(param->getLastRecipe());
         if (index != -1) {
             ui->qcbListeRecettes->setCurrentIndex(index);
-            ui->sbQuantite->setValue(param.getQteLastRecipe());
+            ui->sbQuantite->setValue(param->getQteLastRecipe());
             emit ui->pbRecherche->clicked();
         }
     }
@@ -952,7 +964,7 @@ void MainWindow::ouvrirAPropos(){
  * Ouvrir la fenêtre des paramètres
  */
 void MainWindow::ouvrirParametres(){
-    diaParametres = new DIA_Parametres(this, m_test);
+    diaParametres = new DIA_Parametres(param, this, m_test);
     connect(diaParametres, SIGNAL(visibiliteFarming(bool)), this, SLOT(visibiliteFarming(bool)));
     connect(diaParametres, SIGNAL(visibiliteDeploiementAuto(bool)), this, SLOT(visibiliteDeploiementAuto(bool)));
     diaParametres->exec();

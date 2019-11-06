@@ -13,7 +13,7 @@ class DIA_Parametres : public QDialog
     Q_OBJECT
 
 public:
-    explicit DIA_Parametres(QWidget *parent = nullptr, bool m_test = false);
+    explicit DIA_Parametres(Settings *set, QWidget *parent = nullptr, bool m_test = false);
     ~DIA_Parametres();
 
 private:
@@ -21,7 +21,7 @@ private:
     // Divers
     bool m_test;
     // Classe complémentaires
-    class settings param;
+    class Settings *param;
 
 signals:
     void visibiliteFarming(bool visible);
@@ -30,6 +30,7 @@ signals:
 private slots:
     void setRestoreRecipe(bool state);
     void setRestoreSizePos(bool state);
+    void setMessageConfirmationFermeture(bool state);
     void setVisibiliteFarming(bool visible);
     void setVisibiliteDeploiementAuto(bool visible);
     void setMiseAJourAuto(bool enabled);

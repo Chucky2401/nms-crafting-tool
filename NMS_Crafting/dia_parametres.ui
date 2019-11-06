@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>410</width>
-    <height>285</height>
+    <height>306</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -37,9 +37,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="gbMiseAJour">
          <property name="title">
-          <string>GroupBox</string>
+          <string>Mise à jour</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
@@ -119,18 +119,25 @@
          <property name="title">
           <string>Fenêtre Principale</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
            <widget class="QCheckBox" name="cbRestoreSizePos">
             <property name="text">
              <string>Restaurer taille et position</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item>
            <widget class="QCheckBox" name="cbRestoreRecipe">
             <property name="text">
              <string>Restaurer dernière recette à l'ouverture</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cbMessageFermeture">
+            <property name="text">
+             <string>Message de confirmation de fermeture</string>
             </property>
            </widget>
           </item>

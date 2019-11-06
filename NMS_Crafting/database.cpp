@@ -19,10 +19,25 @@ bool database::createConnection(QString name)
 {
     bool bCreationReussi = false;
     bool bConnexionReussi = false;
+    bool bDossier = false;
     this->base = QSqlDatabase::addDatabase("QSQLITE", name);
     this->resetAll();
 
-    if(!QFile::exists(param.getBddPath()+param.getBddName())){
+    if(!QDir(param.getBddPath()).exists()){
+        qDebug() << "Le dossier pour la BDD n'existe pas";
+        qInfo() << "Création dossier pour la BDD";
+        if(QDir().mkdir(param.getBddPath())) {
+            qInfo() << "Création dossier pour la BDD OK";
+            bDossier = true;
+        } else {
+            setError("La création du dossier pour la base a échoué.");
+            qCritical() << "Création dossier pour la BDD KO";
+        }
+    } else {
+        bDossier = true;
+    }
+
+    if(bDossier && !QFile::exists(param.getBddPath()+param.getBddName())){
         qDebug() << param.getBddPath() + param.getBddName() << " - La base n'existe pas ! / " << name;
         QFile qfBaseDeDonnees(param.getBddPath() + param.getBddName());
         qfBaseDeDonnees.open(QIODevice::WriteOnly);

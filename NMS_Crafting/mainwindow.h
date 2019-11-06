@@ -45,7 +45,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
     public:
-        explicit MainWindow(QWidget *parent = nullptr, bool m_test = false);
+        explicit MainWindow(QWidget *parent = nullptr, bool test = false);
         ~MainWindow();
 
     protected:
@@ -62,7 +62,7 @@ class MainWindow : public QMainWindow {
         // Divers
         bool m_test;
         // Classe complèmentaire
-        class settings param;
+        class Settings *param;
         class database bdd;
         // Fenêtres complémentaires
         ajouterRecette *fenAjouterRecette;

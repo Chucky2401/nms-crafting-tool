@@ -7,12 +7,13 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QDate>
+#include <QDir>
 
 
-class settings
+class Settings
 {
 public:
-    settings();
+    Settings();
 
     void initialisation(bool test = false);
 
@@ -76,9 +77,14 @@ public:
     int getIniNombreJourMiseAJour();
     int getNombreJourMiseAJour();
 
-    void setProchaineVerificationMiseAJour(QDate date);
-    QDate getIniProchaineVerificationMiseAJour();
-    QDate getProchaineVerificationMiseAJour();
+    void setDerniereVerificationMiseAJour(QDate date);
+    QDate getIniDerniereVerificationMiseAJour();
+    QDate getDerniereVerificationMiseAJour();
+    QDate getProchaineVerificationMiseAjour();
+
+    void setMessageConfirmationFermeture(bool enabled);
+    bool getIniMessageConfirmationFermeture();
+    bool getMessageConfirmationFermeture();
 
 private:
     const QVariant settingDefaultString = "DNE";
@@ -104,7 +110,8 @@ private:
     bool m_visibiliteDeploiementAuto;
     bool m_verificationAutoMiseAJour;
     int m_nombreJourMiseAJour;
-    QDate m_prochaineVerificationMiseAJour;
+    QDate m_derniereVerificationMiseAJour;
+    bool m_messageConfirmationFermeture;
 
 };
 
