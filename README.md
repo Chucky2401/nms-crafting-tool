@@ -235,6 +235,40 @@ Voici la liste des modifications
 
 ![v0.1.5.3a](https://i.imgur.com/RIB7LZB.jpg)
 
+### **v0.1.5.4a** - *07/11/2019*
+Pour cette version correction de gros bug et d'oublie...
+Amélioration du code et ajout d'une petite fonctionnalité au passage.
+
+Comme quoi les tests, ça sert !
+
+* Main
+	- [Correction] Initialisation variable pour mode test à *false*
+* Fenêtre Principale
+	- [Correction] Constructeur pour initialiser variable pour mode test
+	- [Amélioration] Utilisation de la classe Settings en pointeur
+	- [Amélioration] Modification appel aux méthode de la classe Settings pour s'adapter au passage en pointeur.
+	- [Amélioration] Suppression du pointeur dans le destructeur pour éviter les fuites mémoires.
+	- [Correction] Vérification des mises à jour disponible après initialisation complète du constructeur
+	- [Ajout] Prise en compte du paramètre pour le message de confirmation de fermeture.
+	- [Amélioration] Passage de la classe Settings en paramètre à la fenêtre des Préférences
+* Fenêtre Préférences
+	- [Correction] Constructeur pour initialiser variable pour mode test
+	- [Amélioration] Utilisation de la classe Settings en pointeur
+	- [Amélioration] Modification appel aux méthode de la classe Settings pour s'adapter au passage en pointeur.
+	- [Amélioration] Suppression du pointeur dans le destructeur pour éviter les fuites mémoires.
+	- [Ajout] Prise en compte du paramètre pour le message de confirmation de fermeture.
+* Classe Settings
+	- [Amélioration] Classe renommer de 'settings' à 'Settings' pour charte et faciliter
+	- [Amélioration] Suppression du paramètre pour la date de prochaine mise à jour par la date de dernière mise à jour.
+	- [Ajout] Gestion du paramètre pour afficher ou non le message de confirmation de fermeture.
+* Classe Database
+	- [Amélioration] Modification nom classe Settings pour prendre la modification de nom
+	- [Correction] Ajout d'un contrôle sur l'existence du dossier 'bdd' qui faisait planter au premier démarrage ou générer une erreur qui empêcher l'utilisation.
+* Fenêtre Ajouter Recette
+	- [Correction] Constructeur pour initialiser variable pour mode test
+
+
+
 
 ## Divers
 **16/06/2019** - [Premier post sur le groupe][premierPost]
