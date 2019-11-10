@@ -22,73 +22,106 @@
 #include <QPixmap>
 #include <QIcon>
 
-#include <QSettings>
+#include <QUrl>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QtXml>
+#include <QProcess>
 
 #include <QDebug>
 
 #include "settings.h"
 #include "database.h"
 #include "ajouterrecette.h"
+#include "dia_apropos.h"
+#include "dia_parametres.h"
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr, bool m_test = false);
-    ~MainWindow();
+    public:
+        explicit MainWindow(QWidget *parent = nullptr, bool test = false);
+        ~MainWindow();
 
-protected:
-    void closeEvent(QCloseEvent *event);
+    protected:
+        void closeEvent(QCloseEvent *event);
 
-public slots:
-    void clickListerIngredients();
-    void recetteChoisis(int index);
-    void modifierQuantite(int valeur);
-    void setFarmingFromButton(int state);
-    void setFarmingFromMenu(bool state);
-    void setAutoExpandFromButton(int state);
-    void setAutoExpandFromMenu(bool state);
-    void setRestoreRecipeFromMenu(bool state);
-    void setRestoreSizePosFromMenu(bool state);
-    void ouvrirFenAjouterRecette();
-    void fenAjouterRecetteClose(int result);
+    private:
+        // Constantes
+        const QVariant settingDefaultString = "DNE";
+        const QString defaultString = "NOTHING";
+        const QVariant settingDefaultInt = -1;
+        const QString connectionName = "principal";
+        // GUI
+        Ui::MainWindow *ui;
+        // Divers
+        bool m_test;
+        // Classe complèmentaire
+        class Settings *param;
+        class database bdd;
+        // Fenêtres complémentaires
+        ajouterRecette *fenAjouterRecette;
+        bool fenAjouterRecetteOuverte;
+        bool ouvertureEnCours;
+        DIA_apropos *diaAPropos;
+        DIA_Parametres *diaParametres;
+        // Recettes
+        QSqlDatabase db;
+        QList<QVariant> recetteSelectionne;
+        QStandardItemModel *modele;
+        QGraphicsPixmapItem itemImageRecette;
+        QGraphicsScene imageRecette;
+        bool viewWasExtended;
+        QStringList itemExpanded;
+        // Mise à jour
+        QNetworkAccessManager *m_qnamManager;
+        QByteArray m_qbaDonneesTelechargees;
+        // Fonctions
+        bool createConnection();
+        void listeRecettes();
+        void listerIngredients(QList<QVariant> recette);
+        bool getEtatFenAjouterRecette();
+        void setEtatFenAjouterRecette(bool stated);
+        void parcourirToutLeModele(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
+        void restaurerDerniereRecette();
 
+    signals:
+        void downloaded(bool ecrireFichierUpdate);
+        void fermeture();
 
-private:
-    bool m_test;
-    ajouterRecette *fenAjouterRecette;
-    bool fenAjouterRecetteOuverte;
-    bool ouvertureEnCours;
-    const QVariant settingDefaultString = "DNE";
-    const QString defaultString = "NOTHING";
-    const QVariant settingDefaultInt = -1;
-    const QString connectionName = "principal";
+    public slots:
 
-    Ui::MainWindow *ui;
-    QSqlDatabase db;
-    //QString recetteSelectionne; // <--- QList<QVariant>
-    QList<QVariant> recetteSelectionne;
-    QStandardItemModel *modele;
-    QGraphicsPixmapItem itemImageRecette;
-    QGraphicsScene imageRecette;
-    bool viewWasExtended;
-    QStringList itemExpanded;
-
-    bool createConnection();
-    void listeRecettes();
-    void listerIngredients(QList<QVariant> recette);
-    void parcourirToutLeModele(QAbstractItemModel* modele, QModelIndex parent = QModelIndex());
-    bool getEtatFenAjouterRecette();
-    void setEtatFenAjouterRecette(bool stated);
-    void restaurerDerniereRecette();
-
-    class settings param;
-    class database bdd;
+    private slots:
+        // Recette et quantités
+        void recetteChoisis(int index);
+        void modifierQuantite(int valeur);
+        void clickListerIngredients();
+        // Options
+        void setFarmingFromButton(int state);
+        void setFarmingFromMenu(bool state);
+        void setAutoExpandFromButton(int state);
+        void setAutoExpandFromMenu(bool state);
+        void setRestoreRecipeFromMenu(bool state);
+        void setRestoreSizePosFromMenu(bool state);
+        // Fenêtre complémentaires
+        void ouvrirFenAjouterRecette();
+        void fenAjouterRecetteClose(int result);
+        void ouvrirAPropos();
+        void ouvrirParametres();
+        // Mise à jour
+        void verifierMiseAJour();
+        void fichierTelecharge(QNetworkReply* pReply);
+        void comparaisonVersion(bool ecrireFichier);
+        // Fenêtre Paramètres
+        void visibiliteFarming(bool visible);
+        void visibiliteDeploiementAuto(bool visible);
+        // TEST
+        void fonctionPourTest();
 };
 
 #endif // MAINWINDOW_H

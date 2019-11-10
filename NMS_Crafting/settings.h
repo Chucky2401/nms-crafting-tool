@@ -6,12 +6,14 @@
 #include <QVariant>
 #include <QByteArray>
 #include <QDebug>
+#include <QDate>
+#include <QDir>
 
 
-class settings
+class Settings
 {
 public:
-    settings();
+    Settings();
 
     void initialisation(bool test = false);
 
@@ -24,7 +26,7 @@ public:
     QString getIniBddPath();
 
     void setBddName(QString name);
-    QString getIniBddName();
+    //QString getIniBddName();
     QString getBddName();
 
     void setFarming(bool enabled);
@@ -59,12 +61,39 @@ public:
     bool getIniRestoreSizePos();
     bool getRestoreSizePos();
 
+    void setVisibiliteFarming(bool visible);
+    bool getIniVisibiliteFarming();
+    bool getVisibiliteFarming();
+
+    void setVisibiliteDeploiementAuto(bool visible);
+    bool getIniVisibiliteDeploiementAuto();
+    bool getVisibiliteDeploiementAuto();
+
+    void setVerificationAutoMiseAJour(bool enabled);
+    bool getIniVerificationAutoMiseAJour();
+    bool getVerificationAutoMiseAJour();
+
+    void setNombreJourMiseAJour(int nombreJour);
+    int getIniNombreJourMiseAJour();
+    int getNombreJourMiseAJour();
+
+    void setDerniereVerificationMiseAJour(QDate date);
+    QDate getIniDerniereVerificationMiseAJour();
+    QDate getDerniereVerificationMiseAJour();
+    QDate getProchaineVerificationMiseAjour();
+
+    void setMessageConfirmationFermeture(bool enabled);
+    bool getIniMessageConfirmationFermeture();
+    bool getMessageConfirmationFermeture();
+
 private:
     const QVariant settingDefaultString = "DNE";
     const QVariant settingDefaultInt = -1;
     const QVariant settingDefaultBool = false;
     const QVariant settingDefaultByteArray = "DNE";
 
+    QString m_qsAppdataPath;
+    QString m_qsPathRoamingBdd;
     QSettings *iniParam;
     QString imagePath;
     QString bddPath;
@@ -72,12 +101,18 @@ private:
     bool farming;
     bool autoExpand;
     bool restoreRecipe;
-    //QString lastRecipe;
     QList<QVariant> lastRecipe;
     int quantiteLastRecipe;
     QByteArray geometrie;
     QByteArray etat;
     bool restoreSizePos;
+    bool m_visibiliteFarming;
+    bool m_visibiliteDeploiementAuto;
+    bool m_verificationAutoMiseAJour;
+    int m_nombreJourMiseAJour;
+    QDate m_derniereVerificationMiseAJour;
+    bool m_messageConfirmationFermeture;
+
 };
 
 #endif // SETTINGS_H

@@ -1,8 +1,8 @@
 #include "ajouterrecette.h"
 #include "ui_ajouterrecette.h"
 
-ajouterRecette::ajouterRecette(QWidget *parent, bool m_test) :
-    QDialog(parent),
+ajouterRecette::ajouterRecette(QWidget *parent, bool test) :
+    QDialog(parent), m_test(test),
     ui(new Ui::ajouterRecette)
 {
     ui->setupUi(this);
@@ -10,8 +10,8 @@ ajouterRecette::ajouterRecette(QWidget *parent, bool m_test) :
     param.initialisation(m_test);
     bdd.initialisation(m_test);
 
-    bool test = bdd.createConnection(connectionName);
-    if(!test){
+    bool testBdd = bdd.createConnection(connectionName);
+    if(!testBdd){
         QString lastBddError = bdd.getError();
         QMessageBox::critical(this, "Connexion à la BDD", "Echec de la connexion à la Base de Données.\nDétails:\n"+bdd.getError());
     }
