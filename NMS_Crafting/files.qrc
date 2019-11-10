@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/file">
+        <file>nms_database.db.sql</file>
+    </qresource>
+</RCC>

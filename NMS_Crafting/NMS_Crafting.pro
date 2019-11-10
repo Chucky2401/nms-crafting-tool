@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,6 +29,8 @@ RC_ICONS = NMS_101.ico
 SOURCES += \
         ajouterrecette.cpp \
         database.cpp \
+        dia_apropos.cpp \
+        dia_parametres.cpp \
         main.cpp \
         mainwindow.cpp \
         settings.cpp
@@ -36,11 +38,15 @@ SOURCES += \
 HEADERS += \
         ajouterrecette.h \
         database.h \
+        dia_apropos.h \
+        dia_parametres.h \
         mainwindow.h \
         settings.h
 
 FORMS += \
         ajouterrecette.ui \
+        dia_apropos.ui \
+        dia_parametres.ui \
         mainwindow.ui
 
 # Default rules for deployment.
@@ -49,4 +55,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
+    files.qrc \
     icones.qrc

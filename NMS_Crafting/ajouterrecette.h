@@ -23,7 +23,7 @@ class ajouterRecette : public QDialog
     Q_ENUMS(eCombo)
 
 public:
-    explicit ajouterRecette(QWidget *parent = nullptr, bool m_test = false);
+    explicit ajouterRecette(QWidget *parent = nullptr, bool test = false);
     ~ajouterRecette();
     enum eTypeComposant {
         RESSOURCE, RECETTE
@@ -58,8 +58,8 @@ private:
     QFileDialog *fileDialog;
     QString fileNameComplete;
 
+    class Settings param;
     class database bdd;
-    class settings param;
 
     void listerComposants(QString typeComposant, QString combo = "Composant1");
     QList<QVariant> listeIdRecette(QString nomComposant, QString descriptionCourte);

@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>ajouterRecette</class>
  <widget class="QDialog" name="ajouterRecette">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -18,6 +21,12 @@
   </property>
   <property name="windowTitle">
    <string>Ajouter une recette</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>true</bool>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>false</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">

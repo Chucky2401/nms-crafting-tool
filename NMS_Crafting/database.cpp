@@ -17,24 +17,85 @@ void database::initialisation(bool test) {
  */
 bool database::createConnection(QString name)
 {
+    bool bCreationReussi = false;
+    bool bConnexionReussi = false;
+    bool bDossier = false;
     this->base = QSqlDatabase::addDatabase("QSQLITE", name);
     this->resetAll();
 
-    if(QFile::exists(param.getBddPath()+param.getBddName())){
+    if(!QDir(param.getBddPath()).exists()){
+        qDebug() << "Le dossier pour la BDD n'existe pas";
+        qInfo() << "Création dossier pour la BDD";
+        if(QDir().mkdir(param.getBddPath())) {
+            qInfo() << "Création dossier pour la BDD OK";
+            bDossier = true;
+        } else {
+            setError("La création du dossier pour la base a échoué.");
+            qCritical() << "Création dossier pour la BDD KO";
+        }
+    } else {
+        bDossier = true;
+    }
+
+    if(bDossier && !QFile::exists(param.getBddPath()+param.getBddName())){
+        qDebug() << param.getBddPath() + param.getBddName() << " - La base n'existe pas ! / " << name;
+        QFile qfBaseDeDonnees(param.getBddPath() + param.getBddName());
+        qfBaseDeDonnees.open(QIODevice::WriteOnly);
+        qfBaseDeDonnees.close();
+
+        this->base.setDatabaseName(param.getBddPath()+param.getBddName());
+        if (!this->base.open()) {
+            setError("La base n'a pas pu être créé");
+            bConnexionReussi = false;
+        } else {
+            bConnexionReussi = true;
+        }
+
+        if(bConnexionReussi){
+            bCreationReussi = initialisationTable();
+            if(!bCreationReussi){
+                setError("La base n'existe pas ou son initialisation a échoué");
+                bConnexionReussi = false;
+            }
+        }
+    } else {
         this->base.setDatabaseName(param.getBddPath()+param.getBddName());
         if (!this->base.open()) {
             setError(this->base.lastError().text());
-            return false;
+            bConnexionReussi = false;
+        } else {
+            bConnexionReussi = true;
         }
-        //QSqlDriver *driver = this->base.driver();
-        //qDebug() << driver->hasFeature(QSqlDriver::Transactions);
-        //QSqlDriver::hasFeature(QSqlDriver::Transactions);
-        return true;
-    } else {
-        setError("La base n'existe pas !");
-        return false;
     }
 
+    return bConnexionReussi;
+}
+
+bool database::initialisationTable(){
+    QFile qfSqlCreation(":/file/nms_database.db.sql");
+    QByteArray line;
+    QSqlQuery query(this->base);
+    bool bExecutionRequeteEchoue = false;
+
+    if(!qfSqlCreation.open(QIODevice::ReadOnly))
+        qDebug() << "Echec Ouverture";
+
+    startTransaction();
+
+    while(!qfSqlCreation.atEnd()){
+        line = qfSqlCreation.readLine();
+        if(!bExecutionRequeteEchoue){
+            qDebug() << line;
+            if(!query.exec(line)){
+                bExecutionRequeteEchoue = true;
+            }
+        }
+    }
+
+    stopTransaction(bExecutionRequeteEchoue);
+
+    qfSqlCreation.close();
+    return !bExecutionRequeteEchoue;
 }
 
 void database::closeConnection(QString name){

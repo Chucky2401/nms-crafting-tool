@@ -7,14 +7,15 @@
 #include <QDebug>
 #include <QString>
 #include <QStringList>
+#include <QMessageBox>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QApplication::setApplicationName("NMS Crafting Tool");
-    QApplication::setApplicationVersion("0.1.4.5a");
+    QApplication::setApplicationVersion("0.1.5.5a");
     QCommandLineParser parser;
-    bool test;
+    bool test = false;
 
     parser.setApplicationDescription(QApplication::translate("main", "Outil pour les recettes de No Man's Sky"));
     parser.addHelpOption();
@@ -35,10 +36,6 @@ int main(int argc, char *argv[])
     QSplashScreen splash(pixmap);
     splash.show();
     app.processEvents();
-
-    QTime dieTime= QTime::currentTime().addSecs(3);
-        while (QTime::currentTime() < dieTime)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
     MainWindow window(nullptr, test);
     window.show();
