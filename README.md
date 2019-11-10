@@ -267,7 +267,8 @@ Comme quoi les tests, ça sert !
 * Fenêtre Ajouter Recette
 	- [Correction] Constructeur pour initialiser variable pour mode test
 
-
+### **v0.1.5.5a** - *10/11/2019*
+Version pour peaufinage et livraison !
 
 
 ## Divers
