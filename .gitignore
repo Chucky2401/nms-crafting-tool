@@ -11,6 +11,7 @@ build-NMS_Crafting/
 Camtasia-NMS_Crafting/
 Screenshots/
 Web/
+Readme_Release/
 ## Files
 .bdd_dans_build-NMS_Crafting
 *.xlsx
@@ -27,5 +28,3 @@ Web/
 # information for Eclipse / Flash Builder.
 *.pdf
 NMS_Crafting/nms_database.db.sql
-README.html
-Release-v0.1.5.5a.md
