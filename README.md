@@ -274,12 +274,15 @@ Version pour peaufinage et livraison !
 
 ## Divers
 **16/06/2019** - [Premier post sur le groupe][premierPost]
+
 **06/08/2019** - Création d'une page [Facebook][nmsctFacebook]
+
 **07/08/2019** - Hébergement web gratuit réservé [NMSCT][epizy.com]
+
 **22/10/2019** - Ouverture du GitHub en "public" et livraison pre-release [GitHub][github]
+
 **31/10/2019** - Changement d'hébergeur pour le site. Qui permet l'utilisation du repository [PlanetHoster][planethoster]
 
-## References
 [Qt]: https://www.qt.io/
 [ransomwareBDD]: https://www.silicon.fr/grandcrab-242223.html
 [nmsfr]: https://www.facebook.com/groups/215415605504595
