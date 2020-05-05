@@ -7,7 +7,7 @@ bin-release/
 # Other files and folders
 ## Folders
 .settings/
-build-NMS_Crafting/
+build/
 Camtasia-NMS_Crafting/
 Screenshots/
 Web/
